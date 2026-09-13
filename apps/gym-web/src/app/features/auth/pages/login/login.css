@@ -1,13 +1,36 @@
+/* ضبط ألوان نصوص الإدخال والـ Placeholder والـ CSS Variables */
 :host ::ng-deep .mat-mdc-form-field {
-  --mdc-outlined-text-field-outline-color: #27272a;
-  --mdc-outlined-text-field-focus-outline-color: #f59e0b;
-  --mdc-outlined-text-field-hover-outline-color: #3f3f46;
-  --mdc-outlined-text-field-label-text-color: #a1a1aa;
-  --mdc-outlined-text-field-focus-label-text-color: #f59e0b;
-  --mat-form-field-container-text-color: #f4f4f5;
+  --mdc-outlined-text-field-label-text-color: #d4d4d8 !important; /* zinc-300 واضح تماماً */
+  --mdc-outlined-text-field-focus-label-text-color: #f59e0b !important;
+  --mdc-outlined-text-field-hover-label-text-color: #f4f4f5 !important;
+  --mdc-outlined-text-field-input-text-color: #f4f4f5 !important;
+  --mdc-outlined-text-field-input-text-placeholder-color: #71717a !important;
+  --mdc-outlined-text-field-outline-color: #3f3f46 !important;
+  --mdc-outlined-text-field-focus-outline-color: #f59e0b !important;
+  --mdc-outlined-text-field-hover-outline-color: #71717a !important;
 }
 
+/* استهداف مباشر لعنصر الـ Label لكسر أي شفافية أو لون داكن موروث */
+:host ::ng-deep .mat-mdc-floating-label,
+:host ::ng-deep .mat-mdc-form-field-label,
+:host ::ng-deep .mdc-floating-label {
+  color: #d4d4d8 !important;
+}
+
+/* لون الـ Label عند التركيز (Focus) */
+:host ::ng-deep .mat-mdc-form-field.mat-focused .mat-mdc-floating-label,
+:host ::ng-deep .mat-mdc-form-field.mat-focused .mdc-floating-label {
+  color: #f59e0b !important;
+}
+
+/* خلفية الحقل */
 :host ::ng-deep .mat-mdc-text-field-wrapper {
-  background-color: rgba(24, 24, 27, 0.7) !important;
-  border-radius: 0.75rem;
+  background-color: rgba(24, 24, 27, 0.85) !important;
+  border-radius: 0.75rem !important;
+}
+
+/* نص الإدخال ومؤشر الكتابة */
+:host ::ng-deep input.mat-mdc-input-element {
+  color: #f4f4f5 !important;
+  caret-color: #f59e0b !important;
 }

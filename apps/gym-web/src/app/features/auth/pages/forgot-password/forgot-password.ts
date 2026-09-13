@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
 
 @Component({
-  selector: 'app-forgot-password',
+  selector: "app-forgot-password",
   imports: [],
-  templateUrl: './forgot-password.html',
-  styleUrl: './forgot-password.css'
+  templateUrl: "./forgot-password.html",
+  styleUrl: "./forgot-password.css",
 })
-export class ForgotPassword {}
+export class ForgotPasswordComponent {}
