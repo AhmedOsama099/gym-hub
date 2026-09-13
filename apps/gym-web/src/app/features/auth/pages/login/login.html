@@ -1,1 +1,75 @@
-<p>login works!</p>
+<gym-auth-layout>
+  <!-- Form Header -->
+  <header class="space-y-2 text-center lg:text-left">
+    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+      Welcome back
+    </h2>
+    <p class="text-sm text-zinc-400">
+      Enter your credentials to access your operations dashboard.
+    </p>
+  </header>
+
+  <!-- Login Form -->
+  <form class="space-y-4" (submit)="$event.preventDefault()">
+    <!-- Email Field -->
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Email Address</mat-label>
+      <input matInput type="email" placeholder="admin@gymhub.com" />
+      <mat-icon matSuffix class="text-zinc-500">mail_outline</mat-icon>
+    </mat-form-field>
+
+    <!-- Password Field -->
+    <div class="space-y-1">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="hidePassword() ? 'password' : 'text'"
+          placeholder="••••••••••••"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="togglePasswordVisibility($event)"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hidePassword()"
+          class="text-zinc-400 hover:text-amber-400"
+        >
+          <mat-icon
+            >{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon
+          >
+        </button>
+      </mat-form-field>
+
+      <div class="flex justify-end">
+        <a
+          routerLink="/auth/forgot-password"
+          class="text-xs font-medium text-amber-400 hover:text-amber-300 transition-colors"
+        >
+          Forgot password?
+        </a>
+      </div>
+    </div>
+
+    <!-- Submit Action -->
+    <button
+      mat-flat-button
+      type="button"
+      class="!w-full !rounded-xl !bg-amber-500 !py-3.5 !text-sm !font-bold !text-black hover:!bg-amber-400 shadow-lg shadow-amber-500/20 cursor-pointer"
+    >
+      Sign In
+    </button>
+  </form>
+
+  <!-- Navigation Switch -->
+  <footer class="text-center text-sm text-zinc-400">
+    Don't have an account?
+    <a
+      routerLink="/auth/register"
+      class="font-semibold text-amber-400 hover:text-amber-300 transition-colors"
+    >
+      Create account
+    </a>
+  </footer>
+</gym-auth-layout>

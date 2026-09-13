@@ -1,1 +1,13 @@
+:host ::ng-deep .mat-mdc-form-field {
+  --mdc-outlined-text-field-outline-color: #27272a;
+  --mdc-outlined-text-field-focus-outline-color: #f59e0b;
+  --mdc-outlined-text-field-hover-outline-color: #3f3f46;
+  --mdc-outlined-text-field-label-text-color: #a1a1aa;
+  --mdc-outlined-text-field-focus-label-text-color: #f59e0b;
+  --mat-form-field-container-text-color: #f4f4f5;
+}
 
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: rgba(24, 24, 27, 0.7) !important;
+  border-radius: 0.75rem;
+}

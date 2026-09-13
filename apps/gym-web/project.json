@@ -8,9 +8,7 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/gym-web",
@@ -23,9 +21,7 @@
             "input": "apps/gym-web/public"
           }
         ],
-        "styles": [
-          "apps/gym-web/src/styles.scss"
-        ],
+        "styles": ["apps/gym-web/src/styles.css"],
         "server": "apps/gym-web/src/main.server.ts",
         "ssr": {
           "entry": "apps/gym-web/src/server.ts"
