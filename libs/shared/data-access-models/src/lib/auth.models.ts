@@ -17,6 +17,12 @@ export interface ILoginRequest {
   password: string;
 }
 
+export interface ILoginResponse {
+  user: IAuthUser;
+  token?: string;
+  message?: string;
+}
+
 export interface IAuthUser {
   id: string;
   email: string;
@@ -24,9 +30,5 @@ export interface IAuthUser {
   lastName: string;
   role: UserRole;
   createdAt?: string;
-}
-
-export interface ILoginResponse {
-  user: ILoginRequest;
-  token: string;
+  updatedAt?: string;
 }

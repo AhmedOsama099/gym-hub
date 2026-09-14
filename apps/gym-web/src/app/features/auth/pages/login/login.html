@@ -9,6 +9,14 @@
     </p>
   </header>
 
+  @if(errorMessage()){
+  <div
+    class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-400 flex items-center gap-2"
+  >
+    <mat-icon class="text-rose-400 text-lg">error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
+  </div>
+  }
   <!-- Login Form -->
   <form class="space-y-4" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
     <!-- Email Field -->
@@ -23,6 +31,12 @@
       />
 
       <mat-icon matSuffix class="text-zinc-500">mail_outline</mat-icon>
+
+      @if (emailControl.hasError("required")){
+      <mat-error>Email is required</mat-error>
+      } @if (emailControl.hasError("email")){
+      <mat-error>Please enter a valid email</mat-error>
+      }
     </mat-form-field>
 
     <!-- Password Field -->
@@ -49,6 +63,13 @@
             >{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon
           >
         </button>
+        @if (passwordControl.hasError('required')) {
+        <mat-error>Password is required</mat-error>
+        } @else if (passwordControl.hasError('minlength')) {
+        <mat-error>Password must be at least 6 characters</mat-error>
+        } @else if (passwordControl.hasError('maxlength')) {
+        <mat-error>Password must be at most 30 characters</mat-error>
+        }
       </mat-form-field>
 
       <div class="flex justify-end">
@@ -65,6 +86,7 @@
     <button
       mat-flat-button
       type="submit"
+      [disabled]="isLoading() || loginForm.invalid"
       class="!w-full !rounded-xl !bg-amber-500 !py-3.5 !text-sm !font-bold !text-black hover:!bg-amber-400 shadow-lg shadow-amber-500/20 cursor-pointer"
     >
       Sign In
