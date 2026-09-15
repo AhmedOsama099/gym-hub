@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Res,
   UseGuards,
 } from "@nestjs/common";
 import { Role } from "@prisma/client";
@@ -15,6 +16,7 @@ import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { Roles } from "./decorators/roles.decorator";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import { RolesGuard } from "./guards/roles.guard";
+import { Response } from "express";
 
 @Controller("auth")
 export class AuthController {
@@ -49,5 +51,19 @@ export class AuthController {
       message: "أهلاً بك في لوحة تحكم الإدارة العليا",
       admin: user,
     };
+  }
+
+  @Post("logout")
+  @HttpCode(HttpStatus.OK)
+  logout(@Res({ passthrough: true }) response: Response) {
+    // حذف الكوكي بتعيين تاريخ انتهاء قديم أو قيمة فارغة
+    response.clearCookie("access_token", {
+      httpOnly: true,
+      secure: false, // اجعلها true في Production مع HTTPS
+      sameSite: "lax",
+      path: "/login",
+    });
+
+    return { message: "Logged out successfully" };
   }
 }
