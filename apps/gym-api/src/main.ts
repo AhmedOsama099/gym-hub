@@ -6,9 +6,12 @@
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app/app.module";
+import cookieParser from "cookie-parser";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(cookieParser());
+
   // تفعيل التحقق التلقائي من صحة المدخلات وتنظيف البيانات غير المعرفة
   app.useGlobalPipes(
     new ValidationPipe({

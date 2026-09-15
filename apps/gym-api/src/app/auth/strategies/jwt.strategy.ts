@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
 import { PrismaService } from "../../prisma/prisma.service";
+import { Request } from "express";
 
 interface JwtPayload {
   sub: string;
@@ -13,7 +14,13 @@ interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly prisma: PrismaService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          return request?.cookies?.access_token;
+        },
+        ExtractJwt.fromAuthHeaderAsBearerToken(), // كدعم إضافي للـ Postman
+      ]),
+
       ignoreExpiration: false,
       secretOrKey:
         process.env["JWT_SECRET"] || "gym_hub_super_secret_jwt_key_2026",

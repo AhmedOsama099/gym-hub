@@ -29,12 +29,32 @@ export class AuthController {
 
   @Post("login")
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    // 1. استدعاء السيرفيس للحصول على التوكن وبيانات المستخدم
+    const result = await this.authService.login(dto);
+
+    // لنفترض أن السيرفيس ترجع { accessToken: '...', user: {...} }
+    // 2. زرع التوكن داخل HttpOnly Cookie في المتصفح
+    response.cookie("access_token", result.accessToken, {
+      httpOnly: true, // تمنع JavaScript في الفرونت من قراءة الكوكي (حماية من XSS)
+      secure: process.env.NODE_ENV === "production", // false محلياً على localhost و true على الإنتاج
+      sameSite: "lax", // تسمح بالتنقل الطبيعي بين الروابط
+      path: "/", // الكوكي متاحة لكامل مسارات الـ API
+      maxAge: 7 * 24 * 60 * 60 * 1000, // أسبوع بالمللي ثانية مثلاً
+    });
+
+    // 3. إرجاع بيانات المستخدم للفرونت إند (بدون التوكن أو معها)
+    return {
+      message: "تم تسجيل الدخول بنجاح",
+      user: result.user,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("profile")
+  @Get("me")
   getProfile(@CurrentUser() user: any) {
     return {
       message: "تم التحقق من هويتك بنجاح",

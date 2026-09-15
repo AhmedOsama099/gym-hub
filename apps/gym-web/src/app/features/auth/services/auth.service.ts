@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { catchError, Observable, tap, of } from "rxjs";
+import { catchError, Observable, tap, of, map } from "rxjs";
 import {
   IAuthUser,
   ILoginRequest,
@@ -17,6 +17,7 @@ export class AuthService {
   private readonly endpoint = `${this.apiUrl}/auth`;
 
   private currentUserSignal = signal<IAuthUser | null>(null);
+  private isInitialCheckDone = false;
 
   readonly currentUser = this.currentUserSignal.asReadonly();
   readonly isAuthenticated = computed(() => !!this.currentUserSignal());
@@ -30,6 +31,7 @@ export class AuthService {
       .pipe(
         tap((response) => {
           this.currentUserSignal.set(response.user);
+          this.isInitialCheckDone = true;
         }),
       );
   }
@@ -50,21 +52,33 @@ export class AuthService {
       );
   }
 
+  getProfile(): Observable<IAuthUser | null> {
+    // إذا فحصنا من قبل والمستخدم غير موجود، نرجع null فوراً دون طلب الـ API مجدداً
+    if (this.isInitialCheckDone && !this.currentUserSignal()) {
+      return of(null);
+    }
+
+    return this.http
+      .get<{ message: string; user: IAuthUser }>(`${this.endpoint}/me`, {
+        withCredentials: true,
+      })
+      .pipe(
+        map((response) => response.user),
+        tap((user) => {
+          this.currentUserSignal.set(user);
+        }),
+        catchError(() => {
+          this.currentUserSignal.set(null);
+          return of(null);
+        }),
+      );
+  }
+
   setUser(user: IAuthUser | null) {
     this.currentUserSignal.set(user);
   }
 
-  getProfile(): Observable<IAuthUser | null> {
-    return this.http
-      .get<IAuthUser>(`${this.endpoint}/me`, {
-        withCredentials: true,
-      })
-      .pipe(
-        tap((user) => this.setUser(user)),
-        catchError(() => {
-          this.setUser(null);
-          return of(null);
-        }),
-      );
+  clearSession(): void {
+    this.currentUserSignal.set(null);
   }
 }
