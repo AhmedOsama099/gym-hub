@@ -47,7 +47,7 @@ export class AuthService {
       )
       .pipe(
         tap(() => {
-          this.currentUserSignal.set(null);
+          this.clearSession();
         }),
       );
   }
@@ -99,6 +99,7 @@ export class AuthService {
   }
 
   clearSession(): void {
+    this.isInitialCheckDone = true;
     this.currentUserSignal.set(null);
   }
 }

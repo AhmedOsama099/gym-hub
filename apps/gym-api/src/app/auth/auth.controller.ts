@@ -55,7 +55,7 @@ export class AuthController {
     // حذف الكوكي بتعيين تاريخ انتهاء قديم أو قيمة فارغة
     response.clearCookie("access_token", {
       httpOnly: true,
-      secure: false, // اجعلها true في Production مع HTTPS
+      secure: process.env["NODE_ENV"] === "production",
       sameSite: "lax",
       path: "/login",
     });

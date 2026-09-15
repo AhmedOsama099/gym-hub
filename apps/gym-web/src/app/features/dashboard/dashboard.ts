@@ -54,8 +54,13 @@ export class DashboardComponent {
 
   onLogout() {
     this.authService.logout().subscribe({
-      next: () => this.router.navigate(["/login"]),
-      error: () => this.router.navigate(["/login"]),
+      next: () => {
+        this.router.navigate(["/login"]);
+      },
+      error: () => {
+        this.authService.clearSession();
+        this.router.navigate(["/login"]);
+      },
     });
   }
 }
