@@ -5,12 +5,12 @@ import { RouterLink } from "@angular/router";
 import { AuthService } from "../../services/auth.service";
 
 @Component({
-  selector: "app-forgot-password",
+  selector: "app-reset-password",
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: "./forgot-password.html",
-  styleUrl: "./forgot-password.css",
+  templateUrl: "./reset-password.html",
+  styleUrl: "./reset-password.css",
 })
-export class ForgotPasswordComponent {
+export class ResetPasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
 

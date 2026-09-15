@@ -10,22 +10,18 @@ import {
 } from "@nestjs/common";
 import { Role } from "@prisma/client";
 import { AuthService } from "./auth.service";
-import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { Roles } from "./decorators/roles.decorator";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import { RolesGuard } from "./guards/roles.guard";
 import { Response } from "express";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post("register")
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
-  }
 
   @Post("login")
   @HttpCode(HttpStatus.OK)
@@ -53,6 +49,32 @@ export class AuthController {
     };
   }
 
+  @Post("logout")
+  @HttpCode(HttpStatus.OK)
+  logout(@Res({ passthrough: true }) response: Response) {
+    // حذف الكوكي بتعيين تاريخ انتهاء قديم أو قيمة فارغة
+    response.clearCookie("access_token", {
+      httpOnly: true,
+      secure: false, // اجعلها true في Production مع HTTPS
+      sameSite: "lax",
+      path: "/login",
+    });
+
+    return { message: "Logged out successfully" };
+  }
+
+  @Post("forgot-password")
+  @HttpCode(HttpStatus.OK)
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Post("reset-password")
+  @HttpCode(HttpStatus.OK)
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get("me")
   getProfile(@CurrentUser() user: any) {
@@ -71,19 +93,5 @@ export class AuthController {
       message: "أهلاً بك في لوحة تحكم الإدارة العليا",
       admin: user,
     };
-  }
-
-  @Post("logout")
-  @HttpCode(HttpStatus.OK)
-  logout(@Res({ passthrough: true }) response: Response) {
-    // حذف الكوكي بتعيين تاريخ انتهاء قديم أو قيمة فارغة
-    response.clearCookie("access_token", {
-      httpOnly: true,
-      secure: false, // اجعلها true في Production مع HTTPS
-      sameSite: "lax",
-      path: "/login",
-    });
-
-    return { message: "Logged out successfully" };
   }
 }

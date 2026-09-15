@@ -52,6 +52,26 @@ export class AuthService {
       );
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.endpoint}/forgot-password`,
+      { email },
+    );
+  }
+
+  resetPassword(
+    token: string,
+    newPassword: string,
+  ): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.endpoint}/reset-password`,
+      {
+        token,
+        newPassword,
+      },
+    );
+  }
+
   getProfile(): Observable<IAuthUser | null> {
     // إذا فحصنا من قبل والمستخدم غير موجود، نرجع null فوراً دون طلب الـ API مجدداً
     if (this.isInitialCheckDone && !this.currentUserSignal()) {
