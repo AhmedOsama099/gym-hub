@@ -4,14 +4,6 @@ export enum UserRole {
   MEMBER = "MEMBER",
 }
 
-export interface IRegisterRequest {
-  email: string;
-  password: string;
-  role: UserRole;
-  firstName: string;
-  lastName: string;
-}
-
 export interface ILoginRequest {
   email: string;
   password: string;
