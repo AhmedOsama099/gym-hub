@@ -18,6 +18,18 @@ enum Role {
   MEMBER
 }
 
+enum PackageType {
+  BASIC
+  PREMIUM
+  ULTIMATE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  PAUSED
+}
+
 model User {
   id             String    @id @default(uuid())
   email          String    @unique
@@ -29,7 +41,46 @@ model User {
   resetPasswordExpires DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  subscriptions Subscription[]
 
   @@map("users")
 }
+
+
+
+
+model Plan {
+  id String @id @default(uuid())
+  name String
+  price Decimal 
+  duration Int // In Months
+  type PackageType
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  subscriptions Subscription[]
+
+
+  @@map("plans")
+}
+
+
+model Subscription {
+  id String @id @default(uuid())
+  userId String
+  planId String
+  status SubscriptionStatus @default(ACTIVE)
+  startDate DateTime @default(now())
+  endDate DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
 
