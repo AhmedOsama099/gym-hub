@@ -85,7 +85,7 @@ export class LoginComponent {
         if (returnUrl) {
           this.router.navigateByUrl(returnUrl);
         } else if (response.user.role === "ADMIN") {
-          this.router.navigate(["/admin"]);
+          this.router.navigate(["/"]);
         } else {
           this.router.navigate(["/"]);
         }

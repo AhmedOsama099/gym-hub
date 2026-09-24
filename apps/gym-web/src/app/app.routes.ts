@@ -1,6 +1,7 @@
 import { Route } from "@angular/router";
 import { authGuard } from "./features/auth/guards/auth-guard";
 import { guestGuard } from "./core/guards/guest.guard";
+import { roleGuard } from "./core/guards/role.guard";
 
 export const appRoutes: Route[] = [
   {
@@ -32,6 +33,15 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import("./features/dashboard/dashboard").then(
         (m) => m.DashboardComponent,
+      ),
+  },
+  {
+    path: "plans",
+    canActivate: [authGuard, roleGuard],
+    data: { expectedRole: "ADMIN" },
+    loadComponent: () =>
+      import("./features/plans/pages/plans/plans.component").then(
+        (m) => m.PlansComponent,
       ),
   },
   {
