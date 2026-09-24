@@ -1,0 +1,111 @@
+/* إزالة الإطارات والظلال الافتراضية من حاوية الدايلوج */
+::ng-deep
+  .cdk-overlay-pane.gym-custom-dialog
+  .mat-mdc-dialog-container
+  .mdc-dialog__surface {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+/* 1. إخفاء أسهم زيادة ونقص الأرقام (Spinners) لجميع المتصفحات */
+::ng-deep .gym-custom-field input[type="number"]::-webkit-outer-spin-button,
+::ng-deep .gym-custom-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+::ng-deep .gym-custom-field input[type="number"] {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* 2. ضبط أبعاد ومظهر حقول الإدخال */
+::ng-deep .gym-custom-field {
+  width: 100% !important;
+  display: block !important;
+}
+
+::ng-deep .gym-custom-field .mat-mdc-text-field-wrapper {
+  background-color: #27272a !important; /* Zinc-800 */
+  border-radius: 0.75rem !important;
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+}
+
+/* 3. تنسيق الحدود (Borders) */
+::ng-deep .gym-custom-field .mdc-notched-outline__leading,
+::ng-deep .gym-custom-field .mdc-notched-outline__notch,
+::ng-deep .gym-custom-field .mdc-notched-outline__trailing {
+  border-color: #3f3f46 !important; /* Zinc-700 */
+}
+
+::ng-deep .gym-custom-field:hover .mdc-notched-outline__leading,
+::ng-deep .gym-custom-field:hover .mdc-notched-outline__notch,
+::ng-deep .gym-custom-field:hover .mdc-notched-outline__trailing {
+  border-color: #71717a !important; /* Zinc-500 */
+}
+
+::ng-deep .gym-custom-field.mat-focused .mdc-notched-outline__leading,
+::ng-deep .gym-custom-field.mat-focused .mdc-notched-outline__notch,
+::ng-deep .gym-custom-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #f59e0b !important; /* Amber Focus */
+  border-width: 2px !important;
+}
+
+/* إصلاح مسار فتحة الـ Notch لمنع تداخل أو انقطاع الإطار */
+::ng-deep .gym-custom-field .mdc-notched-outline__notch {
+  border-right: none !important;
+  border-left: none !important;
+  padding: 0 6px !important;
+}
+
+/* 4. وضوح النصوص والـ Placeholder */
+::ng-deep .gym-custom-field input.mat-mdc-input-element,
+::ng-deep .gym-custom-field textarea.mat-mdc-input-element {
+  color: #ffffff !important;
+  font-size: 0.9375rem !important;
+  caret-color: #f59e0b !important;
+}
+
+::ng-deep .gym-custom-field input::placeholder,
+::ng-deep .gym-custom-field textarea::placeholder {
+  color: #71717a !important; /* Zinc-500 */
+  opacity: 1 !important;
+}
+
+/* 5. تثبيت الـ Label في الأعلى وضمان عدم تداخله */
+::ng-deep .gym-custom-field .mat-mdc-floating-label {
+  color: #d4d4d8 !important; /* Zinc-300 */
+  font-weight: 500 !important;
+  padding: 0 4px !important;
+}
+
+::ng-deep .gym-custom-field.mat-focused .mat-mdc-floating-label {
+  color: #f59e0b !important;
+}
+
+/* 6. قائمة الـ Select والقيمة المحددة */
+::ng-deep .gym-custom-field .mat-mdc-select-value-text,
+::ng-deep .gym-custom-field .mat-mdc-select-arrow {
+  color: #f4f4f5 !important;
+}
+
+::ng-deep .mat-mdc-select-panel {
+  background-color: #18181b !important; /* Zinc-900 */
+  border: 1px solid #3f3f46 !important;
+}
+
+::ng-deep .mat-mdc-option .mdc-list-item__primary-text {
+  color: #e4e4e7 !important;
+}
+
+::ng-deep .mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text {
+  color: #f59e0b !important;
+}
+
+/* 7. Spinner */
+::ng-deep .mat-mdc-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: #f59e0b;
+}

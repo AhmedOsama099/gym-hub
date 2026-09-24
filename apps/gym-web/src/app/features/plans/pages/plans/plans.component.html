@@ -1,0 +1,324 @@
+<div class="min-h-screen bg-zinc-950 text-zinc-100 p-6 md:p-10 space-y-8">
+  <!-- Header Section -->
+  <div
+    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-zinc-800/80 pb-6"
+  >
+    <div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white">
+        Membership Plans
+      </h1>
+      <p class="text-sm text-zinc-400 mt-1">
+        Manage subscription tiers, pricing, and duration for your gym members.
+      </p>
+    </div>
+
+    <button
+      mat-flat-button
+      class="!bg-amber-500 !text-black !font-bold !rounded-xl !px-5 !py-2.5 hover:!bg-amber-400 transition-all flex items-center gap-2 cursor-pointer shadow-lg shadow-amber-500/20"
+      (click)="openCreateDialog()"
+    >
+      <mat-icon class="!text-black">add</mat-icon>
+      Create New Plan
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (plansService.loading()) {
+    <div class="flex flex-col justify-center items-center py-24 space-y-4">
+      <mat-spinner diameter="44" strokeWidth="3"></mat-spinner>
+      <p class="text-xs text-zinc-400 tracking-widest uppercase">
+        Loading Plans...
+      </p>
+    </div>
+  }
+
+  <!-- Plans Table -->
+  @if (!plansService.loading()) {
+    <div
+      class="bg-zinc-900/70 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm"
+    >
+      <table
+        mat-table
+        [dataSource]="plansService.plans()"
+        class="w-full !bg-transparent text-left"
+      >
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="!text-xs !font-bold !uppercase !tracking-wider !text-zinc-400 !border-zinc-800 !py-4"
+          >
+            Plan Name
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let plan"
+            class="!text-white !font-semibold !border-zinc-800/60 !py-4"
+          >
+            {{ plan.name }}
+          </td>
+        </ng-container>
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="!text-xs !font-bold !uppercase !tracking-wider !text-zinc-400 !border-zinc-800 !py-4"
+          >
+            Tier Type
+          </th>
+          <td mat-cell *matCellDef="let plan" class="!border-zinc-800/60 !py-4">
+            <span
+              class="px-2.5 py-1 rounded-md text-xs font-bold tracking-wide uppercase inline-flex items-center"
+              [ngClass]="{
+                'bg-amber-500/10 text-amber-400 border border-amber-500/30':
+                  plan.type === 'VIP',
+                'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30':
+                  plan.type === 'PREMIUM',
+                'bg-blue-500/10 text-blue-400 border border-blue-500/30':
+                  plan.type === 'STANDARD',
+              }"
+            >
+              {{ plan.type }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Duration Column -->
+        <ng-container matColumnDef="duration">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="!text-xs !font-bold !uppercase !tracking-wider !text-zinc-400 !border-zinc-800 !py-4"
+          >
+            Duration
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let plan"
+            class="!text-zinc-300 !border-zinc-800/60 !py-4"
+          >
+            {{ plan.duration }} {{ plan.duration > 1 ? "Months" : "Month" }}
+          </td>
+        </ng-container>
+
+        <!-- Price Column -->
+        <ng-container matColumnDef="price">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="!text-xs !font-bold !uppercase !tracking-wider !text-zinc-400 !border-zinc-800 !py-4"
+          >
+            Price
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let plan"
+            class="!text-amber-400 !font-bold !border-zinc-800/60 !py-4"
+          >
+            {{ plan.price | currency: "USD" : "symbol" : "1.0-0" }}
+          </td>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            class="!text-xs !font-bold !uppercase !tracking-wider !text-zinc-400 !border-zinc-800 !py-4"
+          >
+            Features / Notes
+          </th>
+          <td
+            mat-cell
+            *matCellDef="let plan"
+            class="!text-zinc-400 !text-sm max-w-sm truncate !border-zinc-800/60 !py-4"
+          >
+            {{ plan.description || "—" }}
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns"
+          class="!bg-zinc-950/80"
+        ></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          class="hover:bg-zinc-800/30 transition-colors"
+        ></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td
+            class="mat-cell text-center py-16 text-zinc-500 !border-zinc-800"
+            [attr.colspan]="displayedColumns.length"
+          >
+            <div class="flex flex-col items-center justify-center space-y-2">
+              <mat-icon class="!w-10 !h-10 !text-3xl text-zinc-600"
+                >receipt_long</mat-icon
+              >
+              <p class="font-medium text-zinc-400">
+                No membership plans available.
+              </p>
+              <p class="text-xs text-zinc-500">
+                Click "Create New Plan" to set up your first tier.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Modal Template -->
+<ng-template #planDialog>
+  <div
+    class="bg-zinc-900 border border-zinc-800 text-zinc-100 p-6 sm:p-8 rounded-2xl w-full shadow-2xl"
+  >
+    <!-- Modal Header -->
+    <div
+      class="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6"
+    >
+      <div>
+        <h2 class="text-xl font-bold text-white tracking-tight">
+          Create Subscription Plan
+        </h2>
+        <p class="text-xs text-zinc-400 mt-0.5">
+          Define package specifications and pricing details
+        </p>
+      </div>
+      <button
+        mat-icon-button
+        (click)="closeDialog()"
+        class="!text-zinc-400 hover:!text-white"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="planForm" (ngSubmit)="submitPlan()" class="space-y-4">
+      <!-- Plan Name -->
+      <mat-form-field
+        appearance="outline"
+        class="w-full gym-custom-field"
+        floatLabel="always"
+      >
+        <mat-label>Plan Name</mat-label>
+        <input
+          matInput
+          formControlName="name"
+          placeholder="e.g. 3 Months VIP Access"
+        />
+        @if (
+          planForm.get("name")?.hasError("required") &&
+          planForm.get("name")?.touched
+        ) {
+          <mat-error>Plan name is required</mat-error>
+        }
+        @if (planForm.get("name")?.hasError("minlength")) {
+          <mat-error>Must be at least 3 characters</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Row: Tier Type & Duration -->
+      <div class="flex flex-col sm:flex-row items-start gap-4 w-full">
+        <div class="w-full sm:w-1/2">
+          <mat-form-field
+            appearance="outline"
+            class="w-full gym-custom-field"
+            floatLabel="always"
+          >
+            <mat-label>Tier Type</mat-label>
+            <mat-select formControlName="type">
+              @for (item of planTypes; track item.value) {
+                <mat-option [value]="item.value">{{ item.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full sm:w-1/2">
+          <mat-form-field
+            appearance="outline"
+            class="w-full gym-custom-field"
+            floatLabel="always"
+          >
+            <mat-label>Duration (Months)</mat-label>
+            <input
+              matInput
+              type="number"
+              formControlName="duration"
+              min="1"
+              placeholder="1"
+            />
+            @if (planForm.get("duration")?.hasError("min")) {
+              <mat-error>Must be at least 1 month</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <mat-form-field
+        appearance="outline"
+        class="w-full gym-custom-field"
+        floatLabel="always"
+      >
+        <mat-label>Price (USD)</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="price"
+          min="1"
+          placeholder="99"
+        />
+        @if (planForm.get("price")?.hasError("min")) {
+          <mat-error>Price must be greater than 0</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Description -->
+      <mat-form-field
+        appearance="outline"
+        class="w-full gym-custom-field"
+        floatLabel="always"
+      >
+        <mat-label>Description & Privileges</mat-label>
+        <textarea
+          matInput
+          rows="3"
+          formControlName="description"
+          placeholder="Include access perks, lockers, personal trainer sessions..."
+        >
+        </textarea>
+      </mat-form-field>
+
+      <!-- Modal Actions -->
+      <div
+        class="flex justify-end items-center gap-3 pt-5 border-t border-zinc-800"
+      >
+        <button
+          type="button"
+          mat-button
+          class="!text-zinc-400 hover:!text-white !font-medium"
+          (click)="closeDialog()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          mat-flat-button
+          class="!bg-amber-500 !text-black !font-bold !rounded-xl !px-6 !py-2.5 hover:!bg-amber-400 disabled:!opacity-50 disabled:!cursor-not-allowed cursor-pointer"
+          [disabled]="isSubmitting()"
+        >
+          {{ isSubmitting() ? "Saving Plan..." : "Save Plan" }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
