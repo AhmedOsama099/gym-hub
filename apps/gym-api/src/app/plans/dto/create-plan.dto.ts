@@ -7,11 +7,16 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  IsUUID,
   Min,
 } from "class-validator";
 import { Type } from "class-transformer";
 
-export class CreatePlanDto {
+export class UpsertPlanDto {
+  @IsOptional()
+  @IsUUID()
+  id?: string;
+
   @IsString()
   @IsNotEmpty({ message: "Plan name is required" })
   name: string;

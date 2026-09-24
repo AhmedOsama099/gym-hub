@@ -1,6 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { CreatePlanDto } from "./dto/create-plan.dto";
+import { UpsertPlanDto } from "./dto/create-plan.dto";
 
 @Injectable()
 export class PlansService {
@@ -17,16 +21,54 @@ export class PlansService {
     };
   }
 
-  async createPlan(dto: CreatePlanDto) {
+  async createPlan(dto: UpsertPlanDto) {
+    const { id, ...data } = dto;
+
     const plan = await this.prisma.plan.create({
-      data: {
-        ...dto,
-      },
+      data,
     });
 
     return {
       message: "Plan created successfully",
       plan,
+    };
+  }
+
+  async updatePlan(id: string, dto: UpsertPlanDto) {
+    if (!id) {
+      throw new BadRequestException("Plan ID is required for updating");
+    }
+
+    const exists = await this.prisma.plan.findUnique({ where: { id } });
+    if (!exists) {
+      throw new NotFoundException(`Plan with ID ${id} not found`);
+    }
+
+    const { id: _, ...data } = dto;
+
+    const plan = await this.prisma.plan.update({
+      where: { id },
+      data,
+    });
+
+    return {
+      message: "Plan updated successfully",
+      plan,
+    };
+  }
+
+  async removePlan(id: string) {
+    const exists = await this.prisma.plan.findUnique({ where: { id } });
+    if (!exists) {
+      throw new NotFoundException(`Plan with ID ${id} not found`);
+    }
+
+    await this.prisma.plan.delete({
+      where: { id },
+    });
+
+    return {
+      message: "Plan deleted successfully",
     };
   }
 }
