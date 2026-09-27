@@ -26,6 +26,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { PlansService } from "../../services/plans.service";
+import { IPlan, IUpsertPlan } from "../../models/plans.models";
 
 interface PlanTypeOption {
   label: string;
@@ -59,6 +60,8 @@ export class PlansComponent implements OnInit {
 
   private dialogRef: MatDialogRef<unknown> | null = null;
   readonly isSubmitting = signal<boolean>(false);
+  readonly isEditMode = signal<boolean>(false);
+  readonly activePlanId = signal<string | null>(null);
 
   readonly displayedColumns: string[] = [
     "name",
@@ -66,6 +69,7 @@ export class PlansComponent implements OnInit {
     "duration",
     "price",
     "description",
+    "actions",
   ];
 
   readonly planTypes: PlanTypeOption[] = [
@@ -109,6 +113,27 @@ export class PlansComponent implements OnInit {
     }
   }
 
+  openEditDialog(plan: IPlan): void {
+    this.isEditMode.set(true);
+    this.activePlanId.set(plan.id);
+
+    const editPlan = this.plansService.plans().find((p) => p.id === plan.id);
+
+    this.planForm.patchValue({
+      name: editPlan?.name,
+      type: editPlan?.type,
+      duration: editPlan?.duration,
+      price: editPlan?.price,
+      description: editPlan?.description,
+    });
+
+    this.dialogRef = this.dialog.open(this.planDialogTemplate, {
+      panelClass: "gym-custom-dialog",
+      width: "540px",
+      disableClose: true,
+    });
+  }
+
   submitPlan(): void {
     if (this.planForm.invalid || this.isSubmitting()) {
       this.planForm.markAllAsTouched();
@@ -117,23 +142,31 @@ export class PlansComponent implements OnInit {
 
     this.isSubmitting.set(true);
     const formValues = this.planForm.value;
+    const planData: IUpsertPlan = {
+      name: formValues.name,
+      type: formValues.type,
+      duration: Number(formValues.duration),
+      price: Number(formValues.price),
+      description: formValues.description || undefined,
+    };
 
-    this.plansService
-      .createPlan({
-        name: formValues.name,
-        type: formValues.type,
-        duration: Number(formValues.duration),
-        price: Number(formValues.price),
-        description: formValues.description || undefined,
-      })
-      .subscribe({
+    if (this.isEditMode() && this.activePlanId()) {
+      this.plansService.updatePlan(this.activePlanId()!, planData).subscribe({
         next: () => {
-          this.isSubmitting.set(false);
+          this.isEditMode.set(false);
           this.closeDialog();
         },
-        error: () => {
-          this.isSubmitting.set(false);
-        },
       });
+    } else {
+      this.plansService.createPlan(planData).subscribe({
+        next: () => this.closeDialog(),
+      });
+    }
+  }
+
+  confirmDelete(plan: IPlan): void {
+    if (confirm(`Are you sure you want to delete "${plan.name}"?`)) {
+      this.plansService.deletePlan(plan.id).subscribe();
+    }
   }
 }

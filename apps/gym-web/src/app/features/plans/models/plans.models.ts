@@ -1,5 +1,5 @@
 export interface IPlan {
-  id: number;
+  id: string;
   name: string;
   price: number;
   duration: number;
@@ -9,7 +9,8 @@ export interface IPlan {
   updatedAt?: string;
 }
 
-export interface ICreatePlan {
+export interface IUpsertPlan {
+  id?: string;
   name: string;
   price: number;
   duration: number;
@@ -22,8 +23,7 @@ export interface IPlansResponse {
   plans: IPlan[];
 }
 
-export interface ICreatePlanResponse {
+export interface IUpsertPlanResponse {
   message: string;
   plan: IPlan;
 }
-

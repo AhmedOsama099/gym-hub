@@ -16,7 +16,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { Role } from "@prisma/client";
 import { RolesGuard } from "../auth/guards/roles.guard";
-import { UpsertPlanDto } from "./dto/create-plan.dto";
+import { UpsertPlanDto } from "./dto/upsert-plan.dto";
 
 @Controller("plans")
 export class PlansController {

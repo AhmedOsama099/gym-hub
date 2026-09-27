@@ -13,10 +13,6 @@ import {
 import { Type } from "class-transformer";
 
 export class UpsertPlanDto {
-  @IsOptional()
-  @IsUUID()
-  id?: string;
-
   @IsString()
   @IsNotEmpty({ message: "Plan name is required" })
   name: string;
