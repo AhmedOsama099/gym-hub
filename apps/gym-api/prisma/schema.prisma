@@ -14,6 +14,7 @@ datasource db {
 
 enum Role {
   ADMIN
+  STAFF
   TRAINER
   MEMBER
 }
@@ -27,15 +28,24 @@ enum PackageType {
 enum SubscriptionStatus {
   ACTIVE
   EXPIRED
-  PAUSED
+  FROZEN
+  CANCELLED
+}
+
+enum GenderType {
+  MALE
+  FEMALE
 }
 
 model User {
   id             String    @id @default(uuid())
-  email          String    @unique
-  passwordHash   String
   firstName      String
   lastName       String
+  email          String    @unique
+  phoneNumber    String    @unique
+  gender         GenderType?
+  dateOfBirth    DateTime?   
+  passwordHash   String
   role           Role      @default(MEMBER)
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
@@ -67,16 +77,19 @@ model Plan {
 
 model Subscription {
   id String @id @default(uuid())
-  userId String
-  planId String
   status SubscriptionStatus @default(ACTIVE)
   startDate DateTime @default(now())
   endDate DateTime
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  planId String
+  plan Plan @relation(fields: [planId], references: [id])
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan Plan @relation(fields: [planId], references: [id])
 
   @@index([userId])
   @@index([status])
