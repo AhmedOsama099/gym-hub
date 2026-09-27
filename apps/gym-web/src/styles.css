@@ -1,2 +1,29 @@
 @import "tailwindcss";
 @import "@angular/material/prebuilt-themes/indigo-pink.css";
+
+/* Snackbar Custom Styling */
+.cdk-overlay-container
+  .mat-mdc-snack-bar-container.snackbar-success
+  .mdc-snackbar__surface {
+  background-color: #064e3b !important; /* أخضر غامق زمردي */
+  color: #a7f3d0 !important;
+  border: 1px solid #059669;
+  border-radius: 0.75rem;
+}
+
+.cdk-overlay-container
+  .mat-mdc-snack-bar-container.snackbar-error
+  .mdc-snackbar__surface {
+  background-color: #4c0519 !important; /* أحمر داكن */
+  color: #fecdd3 !important;
+  border: 1px solid #e11d48;
+  border-radius: 0.75rem;
+}
+
+.cdk-overlay-container
+  .mat-mdc-snack-bar-container
+  .mdc-snackbar__action
+  button {
+  color: #ffffff !important;
+  font-weight: 600;
+}

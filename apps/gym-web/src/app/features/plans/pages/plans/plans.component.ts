@@ -27,6 +27,7 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { PlansService } from "../../services/plans.service";
 import { IPlan, IUpsertPlan } from "../../models/plans.models";
+import { NotificationService } from "../../../../core/notification.service";
 
 interface PlanTypeOption {
   label: string;
@@ -55,7 +56,7 @@ export class PlansComponent implements OnInit {
   protected readonly plansService = inject(PlansService);
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
-
+  private notify = inject(NotificationService);
   @ViewChild("planDialog") planDialogTemplate!: TemplateRef<unknown>;
 
   private dialogRef: MatDialogRef<unknown> | null = null;
@@ -156,6 +157,11 @@ export class PlansComponent implements OnInit {
           this.isEditMode.set(false);
           this.closeDialog();
           this.isSubmitting.set(false);
+          this.notify.success("Plan updated successfully!");
+        },
+        error: (err) => {
+          this.isSubmitting.set(false);
+          this.notify.error("Failed to update plan");
         },
       });
     } else {
@@ -163,6 +169,11 @@ export class PlansComponent implements OnInit {
         next: () => {
           this.closeDialog();
           this.isSubmitting.set(false);
+          this.notify.success("Plan created successfully!");
+        },
+        error: (err) => {
+          this.isSubmitting.set(false);
+          this.notify.error("Failed to create plan");
         },
       });
     }
@@ -170,7 +181,14 @@ export class PlansComponent implements OnInit {
 
   confirmDelete(plan: IPlan): void {
     if (confirm(`Are you sure you want to delete "${plan.name}"?`)) {
-      this.plansService.deletePlan(plan.id).subscribe();
+      this.plansService.deletePlan(plan.id).subscribe({
+        next: () => {
+          this.notify.success("Plan deleted successfully!");
+        },
+        error: (err) => {
+          this.notify.error("Failed to delete plan");
+        },
+      });
     }
   }
 }
