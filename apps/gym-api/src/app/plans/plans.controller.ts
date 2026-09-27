@@ -39,7 +39,7 @@ export class PlansController {
 
   @Patch(":id")
   @Roles(Role.ADMIN)
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body() dto: UpsertPlanDto,
@@ -49,7 +49,7 @@ export class PlansController {
 
   @Delete(":id")
   @Roles(Role.ADMIN)
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.plansService.removePlan(id);
   }

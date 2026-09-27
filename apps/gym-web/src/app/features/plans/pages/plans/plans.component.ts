@@ -30,7 +30,7 @@ import { IPlan, IUpsertPlan } from "../../models/plans.models";
 
 interface PlanTypeOption {
   label: string;
-  value: "STANDARD" | "PREMIUM" | "VIP";
+  value: "BASIC" | "PREMIUM" | "ULTIMATE";
 }
 
 @Component({
@@ -73,9 +73,9 @@ export class PlansComponent implements OnInit {
   ];
 
   readonly planTypes: PlanTypeOption[] = [
-    { label: "Standard", value: "STANDARD" },
+    { label: "Standard", value: "BASIC" },
     { label: "Premium", value: "PREMIUM" },
-    { label: "VIP", value: "VIP" },
+    { label: "VIP", value: "ULTIMATE" },
   ];
 
   planForm: FormGroup = this.fb.group({
@@ -155,11 +155,15 @@ export class PlansComponent implements OnInit {
         next: () => {
           this.isEditMode.set(false);
           this.closeDialog();
+          this.isSubmitting.set(false);
         },
       });
     } else {
       this.plansService.createPlan(planData).subscribe({
-        next: () => this.closeDialog(),
+        next: () => {
+          this.closeDialog();
+          this.isSubmitting.set(false);
+        },
       });
     }
   }
