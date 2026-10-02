@@ -42,12 +42,20 @@ import { AuthService } from "../auth/services/auth.service";
             <span class="text-amber-400 font-bold">{{ user()?.role }}</span>
           </p>
         </div>
-        <button
-          (click)="goToPlans()"
-          class="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer"
-        >
-          Go to plans
-        </button>
+        <div class="flex flex-col space-y-2 w-fit">
+          <button
+            (click)="goToPlans()"
+            class="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer"
+          >
+            Go to plans
+          </button>
+          <button
+            (click)="goToMembers()"
+            class="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer"
+          >
+            Go to members
+          </button>
+        </div>
       </div>
     </div>
   `,
@@ -72,5 +80,8 @@ export class DashboardComponent {
 
   goToPlans() {
     this.router.navigate(["/plans"]);
+  }
+  goToMembers() {
+    this.router.navigate(["/members"]);
   }
 }

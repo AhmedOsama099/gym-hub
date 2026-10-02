@@ -45,6 +45,15 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: "members",
+    canActivate: [authGuard, roleGuard],
+    data: { expectedRole: ["ADMIN", "STAFF"] },
+    loadComponent: () =>
+      import("./features/members/pages/members-list/members-list.component").then(
+        (m) => m.MembersListComponent,
+      ),
+  },
+  {
     path: "",
     redirectTo: "dashboard",
     pathMatch: "full",

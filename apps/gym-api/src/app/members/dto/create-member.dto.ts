@@ -32,11 +32,11 @@ export class CreateMemberDto {
   email?: string;
 
   @IsEnum(GenderType, { message: "Gender is invalid" })
-  @IsDate({ message: "Date of birth must be a valid date" })
   @IsNotEmpty({ message: "Gender is required" })
   gender: GenderType;
 
   @Type(() => Date)
+  @IsDate({ message: "Date of birth must be a valid date" })
   @IsNotEmpty({ message: "Date of birth is required" })
   dateOfBirth: Date;
 

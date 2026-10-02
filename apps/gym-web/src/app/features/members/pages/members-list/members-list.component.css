@@ -1,0 +1,85 @@
+/* Dialog Backdrop & Surface Customization */
+::ng-deep .gym-custom-dialog .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: #18181b !important; /* zinc-900 */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75) !important;
+  padding: 0 !important;
+  border-radius: 1rem !important;
+  border: 1px solid #27272a !important; /* zinc-800 */
+  overflow: hidden !important;
+}
+
+/* Material Form Fields Custom Dark Theme */
+::ng-deep .gym-custom-field {
+  width: 100%;
+
+  /* Borders Styling */
+  --mdc-outlined-text-field-outline-color: #3f3f46 !important; /* zinc-700 واضح ومحدد */
+  --mdc-outlined-text-field-hover-outline-color: #71717a !important; /* zinc-500 */
+  --mdc-outlined-text-field-focus-outline-color: #10b981 !important; /* emerald-500 */
+  --mdc-outlined-text-field-outline-width: 1px !important;
+  --mdc-outlined-text-field-focus-outline-width: 2px !important;
+
+  /* Labels & Text Styling */
+  --mdc-outlined-text-field-label-text-color: #a1a1aa !important; /* zinc-400 فاتح ومقروء */
+  --mdc-outlined-text-field-focus-label-text-color: #10b981 !important;
+  --mdc-outlined-text-field-input-text-color: #ffffff !important; /* أبيض ناصع للكتابة */
+  --mdc-outlined-text-field-input-text-placeholder-color: #71717a !important;
+
+  /* Errors */
+  --mdc-outlined-text-field-error-outline-color: #f43f5e !important;
+  --mdc-outlined-text-field-error-label-text-color: #fb7185 !important;
+}
+
+/* خلفية الحقول لتكون متباينة عن خلفية الديالوج */
+::ng-deep .gym-custom-field .mat-mdc-text-field-wrapper {
+  background-color: #27272a !important; /* zinc-800 فاتح قليلاً لتظهر الصناديق */
+  border-radius: 0.5rem !important;
+}
+
+/* Dropdown Arrows & Icons */
+::ng-deep .gym-custom-field .mat-mdc-select-value-text,
+::ng-deep .gym-custom-field .mat-mdc-select-arrow,
+::ng-deep .gym-custom-field .mat-datepicker-toggle button {
+  color: #e4e4e7 !important; /* zinc-200 */
+}
+
+/* Dropdown Menus Panel & Calendar Overlay */
+::ng-deep .mat-mdc-select-panel,
+::ng-deep .mat-datepicker-content {
+  background-color: #18181b !important; /* zinc-900 */
+  border: 1px solid #3f3f46 !important; /* zinc-700 */
+  color: #f4f4f5 !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+::ng-deep .mat-mdc-option {
+  --mat-option-label-text-color: #d4d4d8 !important;
+}
+
+::ng-deep .mat-mdc-option:hover:not(.mdc-list-item--disabled) {
+  background-color: #27272a !important;
+}
+
+::ng-deep
+  .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  .mdc-list-item__primary-text {
+    color: #34d399 !important; /* emerald-400 */
+    font-weight: 600;
+  }
+}
+
+/* Calendar Datepicker Day Colors */
+::ng-deep .mat-calendar-body-cell-content {
+  color: #e4e4e7 !important;
+}
+
+::ng-deep .mat-calendar-body-selected {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+}
+
+::ng-deep .mat-calendar-table-header th,
+::ng-deep .mat-calendar-arrow {
+  color: #a1a1aa !important;
+}
