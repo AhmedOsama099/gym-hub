@@ -224,7 +224,7 @@
                   </div>
                 </td>
                 <td class="px-5 py-4 whitespace-nowrap">
-                  @if (m.subscriptions?.[0]?.plan; as plan) {
+                  @if (m.subscriptions[0].plan; as plan) {
                     <span class="font-medium text-zinc-200">{{
                       plan.name
                     }}</span>
@@ -237,7 +237,7 @@
                 </td>
                 <td class="px-5 py-4 whitespace-nowrap">
                   @if (
-                    m.subscriptions?.[0]?.status === SubscriptionStatus.ACTIVE
+                    m.subscriptions[0].status === SubscriptionStatus.ACTIVE
                   ) {
                     <span
                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/50"
@@ -248,7 +248,7 @@
                       ACTIVE
                     </span>
                   } @else if (
-                    m.subscriptions?.[0]?.status === SubscriptionStatus.EXPIRED
+                    m.subscriptions[0].status === SubscriptionStatus.EXPIRED
                   ) {
                     <span
                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-950/80 text-rose-400 border border-rose-800/50"
@@ -260,13 +260,13 @@
                     <span
                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-400 border border-zinc-700"
                     >
-                      {{ m.subscriptions?.[0]?.status || "NONE" }}
+                      {{ m.subscriptions[0].status || "NONE" }}
                     </span>
                   }
                 </td>
                 <td class="px-5 py-4 whitespace-nowrap text-zinc-400 text-xs">
                   {{
-                    m.subscriptions?.[0]?.endDate
+                    m.subscriptions[0].endDate
                       ? (m.subscriptions[0].endDate | date: "mediumDate")
                       : "-"
                   }}

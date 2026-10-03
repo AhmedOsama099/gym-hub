@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -10,7 +9,8 @@ import { Role, SubscriptionStatus } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 import * as crypto from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
-
+import { UpdateMemberDto } from "./dto/update-member.dto";
+import { RenewSubscriptionDto } from "./dto/renew-subscription.dto";
 @Injectable()
 export class MembersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -156,5 +156,166 @@ export class MembersService {
         createdAt: "desc",
       },
     });
+  }
+
+  // أضف هذه الدوال داخل كلاس MembersService:
+
+  /**
+   * 1. تعديل البيانات الشخصية للعضو
+   */
+  async update(id: string, dto: UpdateMemberDto) {
+    // التحقق من وجود العضو
+    const member = await this.prisma.user.findFirst({
+      where: { id, role: Role.MEMBER },
+    });
+
+    if (!member) {
+      throw new NotFoundException(`Member with ID "${id}" not found`);
+    }
+
+    // التحقق من عدم تكرار الهاتف أو البريد مع مستخدم آخر
+    if (dto.phoneNumber || dto.email) {
+      const conflictUser = await this.prisma.user.findFirst({
+        where: {
+          id: { not: id },
+          OR: [
+            ...(dto.phoneNumber ? [{ phoneNumber: dto.phoneNumber }] : []),
+            ...(dto.email ? [{ email: dto.email }] : []),
+          ],
+        },
+      });
+
+      if (conflictUser) {
+        if (conflictUser.phoneNumber === dto.phoneNumber) {
+          throw new ConflictException(
+            "Phone number is already taken by another user",
+          );
+        }
+        if (dto.email && conflictUser.email === dto.email) {
+          throw new ConflictException("Email is already taken by another user");
+        }
+      }
+    }
+
+    const updatedMember = await this.prisma.user.update({
+      where: { id },
+      data: dto,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        phoneNumber: true,
+        email: true,
+        gender: true,
+        dateOfBirth: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      message: "Member profile updated successfully",
+      data: updatedMember,
+    };
+  }
+
+  /**
+   * 2. حذف العضو (مع اشتراكاته تلقائياً عبر onDelete: Cascade)
+   */
+  async remove(id: string) {
+    const member = await this.prisma.user.findFirst({
+      where: { id, role: Role.MEMBER },
+    });
+
+    if (!member) {
+      throw new NotFoundException(`Member with ID "${id}" not found`);
+    }
+
+    await this.prisma.user.delete({
+      where: { id },
+    });
+
+    return {
+      message: `Member "${member.firstName} ${member.lastName}" deleted successfully`,
+    };
+  }
+
+  /**
+   * 3. تجديد الاشتراك (Renew Subscription)
+   */
+  async renewSubscription(userId: string, dto: RenewSubscriptionDto) {
+    // التأكد من العضو
+    const member = await this.prisma.user.findFirst({
+      where: { id: userId, role: Role.MEMBER },
+      include: {
+        subscriptions: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException(`Member with ID "${userId}" not found`);
+    }
+
+    // التأكد من الباقة
+    const plan = await this.prisma.plan.findUnique({
+      where: { id: dto.planId },
+    });
+
+    if (!plan) {
+      throw new NotFoundException(`Plan with ID "${dto.planId}" not found`);
+    }
+
+    // حساب تواريخ الاشتراك الجديد
+    // إذا كان للعضو اشتراك حالي فعال ينتهي في المستقبل، يبدأ التجديد من لحظة انتهائه، وإلا يبدأ من الآن
+    const latestSub = member.subscriptions[0];
+    const now = new Date();
+
+    let startDateTime = dto.startDate ? new Date(dto.startDate) : now;
+    if (
+      !dto.startDate &&
+      latestSub &&
+      latestSub.endDate > now &&
+      latestSub.status === SubscriptionStatus.ACTIVE
+    ) {
+      startDateTime = new Date(latestSub.endDate);
+    }
+
+    const endDateTime = new Date(startDateTime);
+    endDateTime.setMonth(endDateTime.getMonth() + plan.duration);
+
+    // تحديث الاشتراكات السابقة السارية إلى EXPIRED ثم إنشاء الاشتراك الجديد داخل Transaction
+    const newSubscription = await this.prisma.$transaction(async (tx) => {
+      await tx.subscription.updateMany({
+        where: {
+          userId,
+          status: SubscriptionStatus.ACTIVE,
+        },
+        data: {
+          status: SubscriptionStatus.EXPIRED,
+        },
+      });
+
+      return tx.subscription.create({
+        data: {
+          userId,
+          planId: plan.id,
+          startDate: startDateTime,
+          endDate: endDateTime,
+          status: SubscriptionStatus.ACTIVE,
+        },
+        include: {
+          plan: true,
+        },
+      });
+    });
+
+    return {
+      message: "Subscription renewed successfully",
+      data: newSubscription,
+    };
   }
 }
