@@ -18,7 +18,7 @@
         mat-flat-button
         type="button"
         (click)="openCreateModal()"
-        class="!bg-emerald-600 hover:!bg-emerald-500 !text-white !font-semibold !rounded-lg !px-4 !py-2.5 !transition-colors shadow-sm inline-flex items-center gap-2"
+        class="!bg-emerald-600 hover:!bg-emerald-500 !text-white !font-semibold !rounded-lg !px-4 !py-2.5 shadow-sm inline-flex items-center gap-2"
       >
         <mat-icon class="!w-5 !h-5 !text-xl !mr-1">person_add</mat-icon>
         <span>Add New Member</span>
@@ -108,13 +108,12 @@
         appearance="outline"
         class="w-full gym-custom-field !mb-[-1.25em]"
       >
-        <mat-label>Search members</mat-label>
+        <mat-label>Search by name, phone or email</mat-label>
         <input
           matInput
           type="text"
           [value]="searchQuery()"
           (input)="onSearchChange($event)"
-          placeholder="Search by name, phone or email..."
         />
         <mat-icon matPrefix class="!text-zinc-400 !mr-2">search</mat-icon>
       </mat-form-field>
@@ -155,7 +154,7 @@
     </div>
   </section>
 
-  <!-- Members Table Section -->
+  <!-- Members Table -->
   <section
     class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-sm"
   >
@@ -171,12 +170,13 @@
             <th scope="col" class="px-5 py-3.5">Active Plan</th>
             <th scope="col" class="px-5 py-3.5">Status</th>
             <th scope="col" class="px-5 py-3.5">End Date</th>
+            <th scope="col" class="px-5 py-3.5 text-right">Actions</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-zinc-800/60">
           @if (loading()) {
             <tr>
-              <td colspan="6" class="px-5 py-10 text-center text-zinc-500">
+              <td colspan="7" class="px-5 py-10 text-center text-zinc-500">
                 <div class="flex items-center justify-center gap-2">
                   <mat-icon class="animate-spin">autorenew</mat-icon>
                   <span>Loading members...</span>
@@ -185,7 +185,7 @@
             </tr>
           } @else if (filteredMembers().length === 0) {
             <tr>
-              <td colspan="6" class="px-5 py-10 text-center text-zinc-500">
+              <td colspan="7" class="px-5 py-10 text-center text-zinc-500">
                 No members found matching your criteria.
               </td>
             </tr>
@@ -271,6 +271,40 @@
                       : "-"
                   }}
                 </td>
+                <td class="px-5 py-4 whitespace-nowrap text-right">
+                  <div class="inline-flex items-center gap-1">
+                    <!-- Renew Subscription -->
+                    <button
+                      mat-icon-button
+                      type="button"
+                      (click)="openRenewModal(m)"
+                      class="!text-zinc-400 hover:!text-emerald-400 transition-colors"
+                      title="Renew Subscription"
+                    >
+                      <mat-icon class="!text-lg">autorenew</mat-icon>
+                    </button>
+                    <!-- Edit Member -->
+                    <button
+                      mat-icon-button
+                      type="button"
+                      (click)="openEditModal(m)"
+                      class="!text-zinc-400 hover:!text-amber-400 transition-colors"
+                      title="Edit Member"
+                    >
+                      <mat-icon class="!text-lg">edit</mat-icon>
+                    </button>
+                    <!-- Delete Member -->
+                    <button
+                      mat-icon-button
+                      type="button"
+                      (click)="openDeleteModal(m)"
+                      class="!text-zinc-400 hover:!text-rose-400 transition-colors"
+                      title="Delete Member"
+                    >
+                      <mat-icon class="!text-lg">delete_outline</mat-icon>
+                    </button>
+                  </div>
+                </td>
               </tr>
             }
           }
@@ -278,7 +312,6 @@
       </table>
     </div>
 
-    <!-- Table Footer -->
     <footer
       class="flex items-center justify-between border-t border-zinc-800 px-5 py-3 text-xs text-zinc-400 bg-zinc-950/40"
     >
@@ -288,34 +321,36 @@
     </footer>
   </section>
 
-  <!-- Add Member Modal Template (MatDialog) -->
+  <!-- 1. Modal: Add / Edit Member Template -->
   <ng-template #memberDialog>
     <div
       class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col max-h-[92vh]"
     >
-      <!-- Dialog Header -->
       <div
         class="flex items-center justify-between border-b border-zinc-800 px-6 py-4"
       >
         <div>
           <h2 class="text-lg font-bold text-white tracking-tight">
-            Add New Member
+            {{ isEditMode() ? "Edit Member Profile" : "Add New Member" }}
           </h2>
           <p class="text-xs text-zinc-400 mt-0.5">
-            Register a gym member and assign their initial subscription.
+            {{
+              isEditMode()
+                ? "Update member details. Subscriptions are managed separately."
+                : "Register a gym member and assign their initial subscription."
+            }}
           </p>
         </div>
         <button
           mat-icon-button
           type="button"
-          (click)="closeCreateModal()"
+          (click)="closeDialog()"
           class="!text-zinc-400 hover:!text-white hover:!bg-zinc-800 transition-colors"
         >
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <!-- Form Body -->
       <form
         [formGroup]="memberForm"
         (ngSubmit)="submitMember()"
@@ -327,7 +362,6 @@
           Personal Information
         </div>
 
-        <!-- First & Last Name -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full gym-custom-field">
             <mat-label>First Name *</mat-label>
@@ -356,7 +390,6 @@
           </mat-form-field>
         </div>
 
-        <!-- Phone & Email -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full gym-custom-field">
             <mat-label>Phone Number *</mat-label>
@@ -391,7 +424,6 @@
           </mat-form-field>
         </div>
 
-        <!-- Gender & Date of Birth -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <mat-form-field appearance="outline" class="w-full gym-custom-field">
             <mat-label>Gender *</mat-label>
@@ -423,58 +455,63 @@
           </mat-form-field>
         </div>
 
-        <!-- Membership Details Section -->
-        <div
-          class="text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-800 pb-2 pt-2"
-        >
-          Initial Membership Details
-        </div>
+        <!-- Initial Plan (Only visible when Creating, Hidden in Edit mode) -->
+        @if (!isEditMode()) {
+          <div
+            class="text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-800 pb-2 pt-2"
+          >
+            Initial Membership Details
+          </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Plan Selection -->
-          <mat-form-field appearance="outline" class="w-full gym-custom-field">
-            <mat-label>Subscription Plan *</mat-label>
-            <mat-select formControlName="planId" placeholder="Select a plan">
-              @for (plan of availablePlans(); track plan.id) {
-                <mat-option [value]="plan.id">
-                  {{ plan.name }} ({{ plan.duration }} Mon -
-                  {{ plan.price }} EGP)
-                </mat-option>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <mat-form-field
+              appearance="outline"
+              class="w-full gym-custom-field"
+            >
+              <mat-label>Subscription Plan *</mat-label>
+              <mat-select formControlName="planId" placeholder="Select a plan">
+                @for (plan of availablePlans(); track plan.id) {
+                  <mat-option [value]="plan.id">
+                    {{ plan.name }} ({{ plan.duration }} Mon -
+                    {{ plan.price }} EGP)
+                  </mat-option>
+                }
+              </mat-select>
+              @if (
+                memberForm.get("planId")?.touched &&
+                memberForm.get("planId")?.hasError("required")
+              ) {
+                <mat-error>Plan is required</mat-error>
               }
-            </mat-select>
-            @if (
-              memberForm.get("planId")?.touched &&
-              memberForm.get("planId")?.hasError("required")
-            ) {
-              <mat-error>Plan is required</mat-error>
-            }
-          </mat-form-field>
+            </mat-form-field>
 
-          <!-- Start Date -->
-          <mat-form-field appearance="outline" class="w-full gym-custom-field">
-            <mat-label>Start Date (Optional)</mat-label>
-            <input
-              matInput
-              [matDatepicker]="startDatePicker"
-              formControlName="startDate"
-              placeholder="Today"
-            />
-            <mat-datepicker-toggle
-              matIconSuffix
-              [for]="startDatePicker"
-            ></mat-datepicker-toggle>
-            <mat-datepicker #startDatePicker></mat-datepicker>
-          </mat-form-field>
-        </div>
+            <mat-form-field
+              appearance="outline"
+              class="w-full gym-custom-field"
+            >
+              <mat-label>Start Date (Optional)</mat-label>
+              <input
+                matInput
+                [matDatepicker]="startDatePicker"
+                formControlName="startDate"
+                placeholder="Today"
+              />
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="startDatePicker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #startDatePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        }
 
-        <!-- Modal Footer Actions -->
         <div
           class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800"
         >
           <button
             mat-button
             type="button"
-            (click)="closeCreateModal()"
+            (click)="closeDialog()"
             class="!text-zinc-400 hover:!text-white hover:!bg-zinc-800 !px-4 !py-2"
           >
             Cancel
@@ -486,10 +523,157 @@
             [disabled]="isSubmitting()"
             class="!bg-emerald-600 hover:!bg-emerald-500 !text-white !font-semibold !px-5 !py-2 !rounded-lg disabled:!opacity-50"
           >
-            {{ isSubmitting() ? "Saving..." : "Save Member & Subscription" }}
+            {{
+              isSubmitting()
+                ? "Saving..."
+                : isEditMode()
+                  ? "Update Profile"
+                  : "Save Member"
+            }}
           </button>
         </div>
       </form>
+    </div>
+  </ng-template>
+
+  <!-- 2. Modal: Renew Subscription Template -->
+  <ng-template #renewDialog>
+    <div
+      class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col"
+    >
+      <div
+        class="flex items-center justify-between border-b border-zinc-800 px-6 py-4"
+      >
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-tight">
+            Renew Subscription
+          </h2>
+          <p class="text-xs text-zinc-400 mt-0.5">
+            Extend membership for
+            <span class="text-emerald-400 font-semibold"
+              >{{ selectedMember()?.firstName }}
+              {{ selectedMember()?.lastName }}</span
+            >
+          </p>
+        </div>
+        <button
+          mat-icon-button
+          type="button"
+          (click)="closeDialog()"
+          class="!text-zinc-400 hover:!text-white hover:!bg-zinc-800"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form
+        [formGroup]="renewForm"
+        (ngSubmit)="submitRenewal()"
+        class="p-6 space-y-4"
+      >
+        <mat-form-field appearance="outline" class="w-full gym-custom-field">
+          <mat-label>Select Renewal Plan *</mat-label>
+          <mat-select formControlName="planId">
+            @for (plan of availablePlans(); track plan.id) {
+              <mat-option [value]="plan.id">
+                {{ plan.name }} ({{ plan.duration }} Months -
+                {{ plan.price }} EGP)
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full gym-custom-field">
+          <mat-label>Renewal Start Date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="renewStartDatePicker"
+            formControlName="startDate"
+            placeholder="Leave empty for auto-continue"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="renewStartDatePicker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #renewStartDatePicker></mat-datepicker>
+          <mat-hint class="!text-zinc-500 !text-xs"
+            >Defaults to current subscription expiry or today.</mat-hint
+          >
+        </mat-form-field>
+
+        <div
+          class="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800"
+        >
+          <button
+            mat-button
+            type="button"
+            (click)="closeDialog()"
+            class="!text-zinc-400 hover:!text-white hover:!bg-zinc-800 !px-4 !py-2"
+          >
+            Cancel
+          </button>
+
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="isSubmitting()"
+            class="!bg-emerald-600 hover:!bg-emerald-500 !text-white !font-semibold !px-5 !py-2 !rounded-lg disabled:!opacity-50"
+          >
+            {{ isSubmitting() ? "Renewing..." : "Confirm Renewal" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </ng-template>
+
+  <!-- 3. Modal: Delete Confirmation Template -->
+  <ng-template #deleteConfirmDialog>
+    <div
+      class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4 w-full"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-full bg-rose-950/70 border border-rose-800/50 flex items-center justify-center text-rose-400"
+        >
+          <mat-icon>warning</mat-icon>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Delete Member</h3>
+          <p class="text-xs text-zinc-400">This action cannot be undone.</p>
+        </div>
+      </div>
+
+      <p class="text-sm text-zinc-300">
+        Are you sure you want to delete member
+        <strong class="text-white"
+          >{{ selectedMember()?.firstName }}
+          {{ selectedMember()?.lastName }}</strong
+        >? All related subscriptions and attendance history will be permanently
+        removed.
+      </p>
+
+      <div
+        class="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800"
+      >
+        <button
+          mat-button
+          type="button"
+          (click)="closeDialog()"
+          class="!text-zinc-400 hover:!text-white hover:!bg-zinc-800 !px-4 !py-2"
+        >
+          Cancel
+        </button>
+
+        <button
+          mat-flat-button
+          type="button"
+          (click)="confirmDelete()"
+          [disabled]="isSubmitting()"
+          class="!bg-rose-600 hover:!bg-rose-500 !text-white !font-semibold !px-5 !py-2 !rounded-lg disabled:!opacity-50"
+        >
+          {{ isSubmitting() ? "Deleting..." : "Delete Member" }}
+        </button>
+      </div>
     </div>
   </ng-template>
 </div>

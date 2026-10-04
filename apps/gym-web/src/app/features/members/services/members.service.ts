@@ -2,7 +2,12 @@ import { Injectable, inject, signal } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, tap, finalize, catchError, throwError } from "rxjs";
 import { API_URL } from "../../../core/tokens/api.token";
-import { IMember, ICreateMemberRequest } from "../models/member.models";
+import {
+  IMember,
+  ICreateMemberRequest,
+  IUpdateMemberRequest,
+  IRenewSubscriptionRequest,
+} from "../models/member.models";
 
 @Injectable({
   providedIn: "root",
@@ -90,6 +95,78 @@ export class MembersService {
         finalize(() => {
           this.loadingSignal.set(false);
         }),
+      );
+  }
+
+  updateMember(id: string, payload: IUpdateMemberRequest): Observable<any> {
+    this.loadingSignal.set(true);
+    return this.http
+      .patch<{ message: string; data: any }>(
+        `${this.endpoint}/${id}`,
+        payload,
+        {
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        tap((res) => {
+          const updated = res.data;
+          this.membersSignal.update((list) =>
+            list.map((m) =>
+              m.id === id
+                ? {
+                    ...m,
+                    ...updated,
+                    subscriptions: m.subscriptions, // الحفاظ على اشتراكاته القائمة
+                  }
+                : m,
+            ),
+          );
+        }),
+        finalize(() => this.loadingSignal.set(false)),
+      );
+  }
+
+  deleteMember(id: string): Observable<any> {
+    this.loadingSignal.set(true);
+    return this.http
+      .delete(`${this.endpoint}/${id}`, { withCredentials: true })
+      .pipe(
+        tap(() => {
+          this.membersSignal.update((list) => list.filter((m) => m.id !== id));
+        }),
+        finalize(() => this.loadingSignal.set(false)),
+      );
+  }
+
+  renewSubscription(
+    id: string,
+    payload: IRenewSubscriptionRequest,
+  ): Observable<any> {
+    this.loadingSignal.set(true);
+    return this.http
+      .post<{ message: string; data: any }>(
+        `${this.endpoint}/${id}/renew`,
+        payload,
+        {
+          withCredentials: true,
+        },
+      )
+      .pipe(
+        tap((res) => {
+          const newSub = res.data;
+          this.membersSignal.update((list) =>
+            list.map((m) =>
+              m.id === id
+                ? {
+                    ...m,
+                    subscriptions: [newSub, ...(m.subscriptions || [])],
+                  }
+                : m,
+            ),
+          );
+        }),
+        finalize(() => this.loadingSignal.set(false)),
       );
   }
 }

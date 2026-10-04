@@ -15,7 +15,6 @@ import {
   Validators,
 } from "@angular/forms";
 
-// Angular Material Modules
 import {
   MatDialog,
   MatDialogModule,
@@ -29,13 +28,14 @@ import { MatSelectModule } from "@angular/material/select";
 import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatNativeDateModule } from "@angular/material/core";
 
-// Services & Models
 import { MembersService } from "../../services/members.service";
 import { PlansService } from "../../../plans/services/plans.service";
 import {
   GenderType,
   ICreateMemberRequest,
   IMember,
+  IUpdateMemberRequest,
+  IRenewSubscriptionRequest,
   SubscriptionStatus,
 } from "../../models/member.models";
 import { NotificationService } from "../../../../core/notification.service";
@@ -66,23 +66,28 @@ export class MembersListComponent implements OnInit {
   private readonly notify = inject(NotificationService);
 
   @ViewChild("memberDialog") memberDialogTemplate!: TemplateRef<unknown>;
+  @ViewChild("renewDialog") renewDialogTemplate!: TemplateRef<unknown>;
+  @ViewChild("deleteConfirmDialog")
+  deleteConfirmDialogTemplate!: TemplateRef<unknown>;
+
   private dialogRef: MatDialogRef<unknown> | null = null;
 
-  // --- Enums متاحة للـ Template ---
   readonly GenderType = GenderType;
   readonly SubscriptionStatus = SubscriptionStatus;
 
-  // --- الـ Signals الخاصة بالفلترة والبيانات ---
   readonly members = this.membersService.members;
   readonly loading = this.membersService.loading;
-  readonly availablePlans = this.plansService.plans; // لقراءة الباقات للـ Dropdown
+  readonly availablePlans = this.plansService.plans;
 
   readonly searchQuery = signal<string>("");
   readonly selectedStatus = signal<string>("ALL");
   readonly selectedPlan = signal<string>("ALL");
   readonly isSubmitting = signal<boolean>(false);
 
-  // --- Computed Signals للحسابات والإحصائيات التلقائية ---
+  // إدارة وضع الإضافة أو التعديل
+  readonly isEditMode = signal<boolean>(false);
+  readonly selectedMember = signal<IMember | null>(null);
+
   readonly filteredMembers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
     const status = this.selectedStatus();
@@ -133,23 +138,18 @@ export class MembersListComponent implements OnInit {
       }
     }
 
-    return {
-      total: all.length,
-      active,
-      expiringSoon,
-      expired,
-    };
+    return { total: all.length, active, expiringSoon, expired };
   });
 
-  // --- الـ Reactive Form لإنشاء عضو جديد ---
   memberForm!: FormGroup;
+  renewForm!: FormGroup;
 
   ngOnInit(): void {
-    this.initForm();
+    this.initForms();
     this.loadInitialData();
   }
 
-  private initForm(): void {
+  private initForms(): void {
     this.memberForm = this.fb.group({
       firstName: ["", [Validators.required, Validators.minLength(2)]],
       lastName: ["", [Validators.required, Validators.minLength(2)]],
@@ -163,36 +163,50 @@ export class MembersListComponent implements OnInit {
       planId: ["", [Validators.required]],
       startDate: [new Date()],
     });
+
+    this.renewForm = this.fb.group({
+      planId: ["", [Validators.required]],
+      startDate: [new Date()],
+    });
   }
 
   loadInitialData(): void {
-    this.membersService.loadMembers().subscribe({
-      error: () => this.notify.error("Failed to load gym members"),
-    });
-    this.plansService.loadPlans().subscribe({
-      error: () => this.notify.error("Failed to load subscription plans"),
-    });
+    this.membersService.loadMembers().subscribe();
+    this.plansService.loadPlans().subscribe();
   }
 
-  // --- إدارة نافذة الإضافة (Dialog) ---
+  // --- Modal: إضافة وتعديل العضو ---
   openCreateModal(): void {
+    this.isEditMode.set(false);
+    this.selectedMember.set(null);
     this.memberForm.reset({
       gender: GenderType.MALE,
       startDate: new Date(),
     });
+    this.memberForm.get("planId")?.setValidators([Validators.required]);
+    this.memberForm.get("planId")?.updateValueAndValidity();
 
-    this.dialogRef = this.dialog.open(this.memberDialogTemplate, {
-      panelClass: "gym-custom-dialog",
-      width: "600px",
-      disableClose: true,
-    });
+    this.openDialog(this.memberDialogTemplate);
   }
 
-  closeCreateModal(): void {
-    if (this.dialogRef) {
-      this.dialogRef.close();
-      this.dialogRef = null;
-    }
+  openEditModal(member: IMember): void {
+    this.isEditMode.set(true);
+    this.selectedMember.set(member);
+
+    // في وضع التعديل لا نلزم الباقة لأنها تعديل بيانات شخصية
+    this.memberForm.get("planId")?.clearValidators();
+    this.memberForm.get("planId")?.updateValueAndValidity();
+
+    this.memberForm.patchValue({
+      firstName: member.firstName,
+      lastName: member.lastName,
+      phoneNumber: member.phoneNumber,
+      email: member.email || "",
+      gender: member.gender || GenderType.MALE,
+      dateOfBirth: member.dateOfBirth ? new Date(member.dateOfBirth) : null,
+    });
+
+    this.openDialog(this.memberDialogTemplate);
   }
 
   submitMember(): void {
@@ -204,37 +218,134 @@ export class MembersListComponent implements OnInit {
     this.isSubmitting.set(true);
     const formVal = this.memberForm.getRawValue();
 
-    const payload: ICreateMemberRequest = {
-      firstName: formVal.firstName.trim(),
-      lastName: formVal.lastName.trim(),
-      phoneNumber: formVal.phoneNumber.trim(),
-      email: formVal.email ? formVal.email.trim() : undefined,
-      gender: formVal.gender,
-      dateOfBirth: new Date(formVal.dateOfBirth).toISOString(),
+    if (this.isEditMode()) {
+      const memberId = this.selectedMember()!.id;
+      const updatePayload: IUpdateMemberRequest = {
+        firstName: formVal.firstName.trim(),
+        lastName: formVal.lastName.trim(),
+        phoneNumber: formVal.phoneNumber.trim(),
+        email: formVal.email ? formVal.email.trim() : undefined,
+        gender: formVal.gender,
+        dateOfBirth: new Date(formVal.dateOfBirth).toISOString(),
+      };
+
+      this.membersService.updateMember(memberId, updatePayload).subscribe({
+        next: () => {
+          this.notify.success("Member profile updated successfully!");
+          this.closeDialog();
+        },
+        error: (err) => this.handleError(err, "Failed to update member"),
+      });
+    } else {
+      const createPayload: ICreateMemberRequest = {
+        firstName: formVal.firstName.trim(),
+        lastName: formVal.lastName.trim(),
+        phoneNumber: formVal.phoneNumber.trim(),
+        email: formVal.email ? formVal.email.trim() : undefined,
+        gender: formVal.gender,
+        dateOfBirth: new Date(formVal.dateOfBirth).toISOString(),
+        planId: formVal.planId,
+        startDate: formVal.startDate
+          ? new Date(formVal.startDate).toISOString()
+          : undefined,
+      };
+
+      this.membersService.createMember(createPayload).subscribe({
+        next: () => {
+          this.notify.success("Member registered successfully!");
+          this.closeDialog();
+        },
+        error: (err) => this.handleError(err, "Failed to create member"),
+      });
+    }
+  }
+
+  // --- Modal: تجديد الاشتراك ---
+  openRenewModal(member: IMember): void {
+    this.selectedMember.set(member);
+    this.renewForm.reset({
+      planId: member.subscriptions?.[0]?.plan ? "" : "",
+      startDate: new Date(),
+    });
+    this.openDialog(this.renewDialogTemplate);
+  }
+
+  submitRenewal(): void {
+    if (this.renewForm.invalid) {
+      this.renewForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    const memberId = this.selectedMember()!.id;
+    const formVal = this.renewForm.getRawValue();
+
+    const payload: IRenewSubscriptionRequest = {
       planId: formVal.planId,
       startDate: formVal.startDate
         ? new Date(formVal.startDate).toISOString()
         : undefined,
     };
 
-    this.membersService.createMember(payload).subscribe({
+    this.membersService.renewSubscription(memberId, payload).subscribe({
       next: () => {
-        this.notify.success("Member and subscription created successfully!");
-        this.isSubmitting.set(false);
-        this.closeCreateModal();
+        this.notify.success("Subscription renewed successfully!");
+        this.closeDialog();
       },
-      error: (err) => {
-        this.isSubmitting.set(false);
-        const msg = err.error?.message || "Failed to save member";
-        this.notify.error(Array.isArray(msg) ? msg[0] : msg);
-      },
+      error: (err) => this.handleError(err, "Failed to renew subscription"),
     });
   }
 
-  // دوال سريعة لأحداث الفلترة
+  // --- Modal: تأكيد الحذف ---
+  openDeleteModal(member: IMember): void {
+    this.selectedMember.set(member);
+    this.dialogRef = this.dialog.open(this.deleteConfirmDialogTemplate, {
+      panelClass: "gym-custom-dialog",
+      width: "450px", // عرض متطابق مع محتوى الحذف
+      disableClose: true,
+    });
+  }
+
+  confirmDelete(): void {
+    const member = this.selectedMember();
+    if (!member) return;
+
+    this.isSubmitting.set(true);
+    this.membersService.deleteMember(member.id).subscribe({
+      next: () => {
+        this.notify.success(
+          `Member "${member.firstName}" deleted successfully`,
+        );
+        this.closeDialog();
+      },
+      error: (err) => this.handleError(err, "Failed to delete member"),
+    });
+  }
+
+  private openDialog(template: TemplateRef<unknown>): void {
+    this.dialogRef = this.dialog.open(template, {
+      panelClass: "gym-custom-dialog",
+      width: "580px",
+      disableClose: true,
+    });
+  }
+
+  closeDialog(): void {
+    this.isSubmitting.set(false);
+    if (this.dialogRef) {
+      this.dialogRef.close();
+      this.dialogRef = null;
+    }
+  }
+
+  private handleError(err: any, fallback: string): void {
+    this.isSubmitting.set(false);
+    const msg = err.error?.message || fallback;
+    this.notify.error(Array.isArray(msg) ? msg[0] : msg);
+  }
+
   onSearchChange(event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
-    this.searchQuery.set(val);
+    this.searchQuery.set((event.target as HTMLInputElement).value);
   }
 
   onStatusChange(status: string): void {

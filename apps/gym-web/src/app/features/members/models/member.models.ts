@@ -11,8 +11,11 @@ export enum SubscriptionStatus {
 }
 
 export interface IMemberPlan {
+  id?: string;
   name: string;
   type: string;
+  duration?: number;
+  price?: number;
 }
 
 // شكل الاشتراك العائد مع العضو
@@ -43,6 +46,20 @@ export interface ICreateMemberRequest {
   email?: string;
   gender: GenderType;
   dateOfBirth: string;
+  planId: string;
+  startDate?: string;
+}
+
+export interface IUpdateMemberRequest {
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  email?: string;
+  gender?: GenderType;
+  dateOfBirth?: string;
+}
+
+export interface IRenewSubscriptionRequest {
   planId: string;
   startDate?: string;
 }

@@ -12,44 +12,62 @@
 ::ng-deep .gym-custom-field {
   width: 100%;
 
-  /* Borders Styling */
-  --mdc-outlined-text-field-outline-color: #3f3f46 !important; /* zinc-700 واضح ومحدد */
-  --mdc-outlined-text-field-hover-outline-color: #71717a !important; /* zinc-500 */
-  --mdc-outlined-text-field-focus-outline-color: #10b981 !important; /* emerald-500 */
+  /* لون الـ Label رمادي فاتح (zinc-400) متطابق مع الـ Sub-text */
+  --mdc-outlined-text-field-label-text-color: #a1a1aa !important;
+  --mdc-outlined-text-field-hover-label-text-color: #d4d4d8 !important; /* zinc-300 */
+  --mdc-outlined-text-field-focus-label-text-color: #10b981 !important; /* emerald-500 */
+
+  /* لون النص المدخل أبيض ناصع */
+  --mdc-outlined-text-field-input-text-color: #ffffff !important;
+
+  /* حدود الحقول */
+  --mdc-outlined-text-field-outline-color: #3f3f46 !important; /* zinc-700 */
+  --mdc-outlined-text-field-hover-outline-color: #52525b !important; /* zinc-600 */
+  --mdc-outlined-text-field-focus-outline-color: #10b981 !important;
   --mdc-outlined-text-field-outline-width: 1px !important;
   --mdc-outlined-text-field-focus-outline-width: 2px !important;
 
-  /* Labels & Text Styling */
-  --mdc-outlined-text-field-label-text-color: #a1a1aa !important; /* zinc-400 فاتح ومقروء */
-  --mdc-outlined-text-field-focus-label-text-color: #10b981 !important;
-  --mdc-outlined-text-field-input-text-color: #ffffff !important; /* أبيض ناصع للكتابة */
-  --mdc-outlined-text-field-input-text-placeholder-color: #71717a !important;
-
-  /* Errors */
+  /* الأخطاء */
   --mdc-outlined-text-field-error-outline-color: #f43f5e !important;
   --mdc-outlined-text-field-error-label-text-color: #fb7185 !important;
 }
 
-/* خلفية الحقول لتكون متباينة عن خلفية الديالوج */
+/* خلفية الحقول */
 ::ng-deep .gym-custom-field .mat-mdc-text-field-wrapper {
-  background-color: #27272a !important; /* zinc-800 فاتح قليلاً لتظهر الصناديق */
+  background-color: #27272a !important; /* zinc-800 */
   border-radius: 0.5rem !important;
 }
 
-/* Dropdown Arrows & Icons */
-::ng-deep .gym-custom-field .mat-mdc-select-value-text,
-::ng-deep .gym-custom-field .mat-mdc-select-arrow,
-::ng-deep .gym-custom-field .mat-datepicker-toggle button {
-  color: #e4e4e7 !important; /* zinc-200 */
+/* لون الـ Label العائم */
+::ng-deep .gym-custom-field .mat-mdc-floating-label {
+  color: #a1a1aa !important;
+  font-weight: 400 !important;
+}
+
+/* لون القيم المدخلة وقيم الـ Select */
+::ng-deep .gym-custom-field input.mat-mdc-input-element,
+::ng-deep .gym-custom-field .mat-mdc-select-value,
+::ng-deep .gym-custom-field .mat-mdc-select-value-text {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+/* أيقونات التاريخ والأسهم */
+::ng-deep .gym-custom-field .mat-mdc-select-arrow svg,
+::ng-deep .gym-custom-field .mat-datepicker-toggle button,
+::ng-deep .gym-custom-field mat-icon {
+  color: #a1a1aa !important;
+  fill: #a1a1aa !important;
 }
 
 /* Dropdown Menus Panel & Calendar Overlay */
 ::ng-deep .mat-mdc-select-panel,
 ::ng-deep .mat-datepicker-content {
-  background-color: #18181b !important; /* zinc-900 */
-  border: 1px solid #3f3f46 !important; /* zinc-700 */
-  color: #f4f4f5 !important;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
+  background-color: #18181b !important;
+  border: 1px solid #3f3f46 !important;
+  color: #ffffff !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7) !important;
 }
 
 ::ng-deep .mat-mdc-option {
@@ -64,7 +82,7 @@
   .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
   background-color: rgba(16, 185, 129, 0.15) !important;
   .mdc-list-item__primary-text {
-    color: #34d399 !important; /* emerald-400 */
+    color: #34d399 !important;
     font-weight: 600;
   }
 }
