@@ -37,6 +37,8 @@ enum GenderType {
   FEMALE
 }
 
+ 
+
 model User {
   id             String    @id @default(uuid())
   firstName      String
@@ -52,6 +54,7 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   subscriptions Subscription[]
+  attendances   AttendanceLog[] 
 
   @@map("users")
 }
@@ -97,3 +100,18 @@ model Subscription {
 }
 
 
+
+  model AttendanceLog {
+  id String @id @default(uuid())
+  checkInAt DateTime @default(now())
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+
+  @@index([userId])
+  @@index([checkInAt])
+  @@map("attendance_logs")
+
+  
+}
