@@ -54,6 +54,15 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: "attendance",
+    canActivate: [authGuard, roleGuard],
+    data: { expectedRole: ["ADMIN", "STAFF"] },
+    loadComponent: () =>
+      import("./features/attendance/pages/attendance.component").then(
+        (m) => m.AttendancePageComponent,
+      ),
+  },
+  {
     path: "",
     redirectTo: "dashboard",
     pathMatch: "full",

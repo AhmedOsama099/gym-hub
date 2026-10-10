@@ -1,0 +1,321 @@
+<div class="min-h-screen bg-zinc-950 text-zinc-100 p-6 space-y-6 antialiased">
+  <header
+    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-5"
+  >
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-white">
+        Daily Check-in Terminal
+      </h1>
+      <p class="text-sm text-zinc-400 mt-1">
+        Scan member barcode/QR or enter phone number to verify active access.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div
+        class="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-xl shadow-sm"
+      >
+        <span class="relative flex h-3 w-3">
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+          ></span>
+          <span
+            class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"
+          ></span>
+        </span>
+        <span class="text-xs font-medium text-zinc-400">Terminal Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div
+      class="lg:col-span-5 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between shadow-lg"
+    >
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <span
+            class="text-xs font-bold uppercase tracking-wider text-emerald-400"
+            >Quick Scan</span
+          >
+          <span class="text-xs text-zinc-400">Press Enter ↵</span>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-zinc-300 mb-2"
+            >Member Phone or UUID</label
+          >
+          <div class="relative">
+            <input
+              (input)="getCheckInValue($event.target.value)"
+              [value]="checkInValue()"
+              (keyup.enter)="onCheckInVerify()"
+              type="text"
+              class="w-full bg-zinc-950/80 border border-zinc-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-4 py-3.5 text-white placeholder-zinc-500 outline-none text-base transition-colors"
+              placeholder="e.g. +20 101 234 5678"
+            />
+            <div
+              class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-zinc-500"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center gap-3">
+        <button
+          type="button"
+          class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span (click)="onCheckInVerify()">Verify & Check In</span>
+        </button>
+
+        <button
+          (click)="onClearInput()"
+          type="button"
+          class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white p-3 rounded-xl transition-colors"
+          title="Clear Input"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    @if (lastCheckIn()?.member?.id && isCard()) {
+      <div
+        class="lg:col-span-7 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between shadow-lg relative overflow-hidden"
+      >
+        <div
+          class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"
+        ></div>
+
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-14 h-14 rounded-2xl bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 flex items-center justify-center font-bold text-xl shadow-inner"
+            >
+              {{ lastCheckIn()?.member?.firstName.charAt(0) | uppercase
+              }}{{ lastCheckIn()?.member?.lastName.charAt(0) | uppercase }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xl font-bold text-white tracking-tight">
+                  {{ lastCheckIn()?.member?.firstName | uppercase }}
+                  {{ lastCheckIn()?.member?.lastName | uppercase }}
+                </h2>
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-950 text-emerald-400 border border-emerald-800/50"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  {{ lastCheckIn()?.plan?.name }}
+                </span>
+              </div>
+              <p class="text-xs text-zinc-400 mt-1">
+                {{ lastCheckIn()?.member?.phoneNumber }} • Checked in at
+                {{ lastCheckIn()?.checkInAt | date }}
+              </p>
+            </div>
+          </div>
+
+          <button
+            (click)="onHideCard()"
+            type="button"
+            class="text-zinc-500 hover:text-zinc-300 transition-colors p-1"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <div
+          class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6 pt-5 border-t border-zinc-800/80"
+        >
+          <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-3">
+            <p
+              class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider"
+            >
+              Active Plan
+            </p>
+            <p class="text-sm font-semibold text-white mt-1">
+              {{ lastCheckIn()?.plan?.name | uppercase }}
+            </p>
+          </div>
+
+          <div class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-3">
+            <p
+              class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider"
+            >
+              Remaining Days
+            </p>
+            <p class="text-sm font-bold text-emerald-400 mt-1">
+              {{
+                getRemainingDays(lastCheckIn()?.plan?.endDate ?? "") | number
+              }}
+              Days Left
+            </p>
+          </div>
+
+          <div
+            class="bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 col-span-2 sm:col-span-1"
+          >
+            <p
+              class="text-[11px] font-medium text-zinc-400 uppercase tracking-wider"
+            >
+              Valid Until
+            </p>
+            <p class="text-sm font-semibold text-zinc-300 mt-1">
+              {{ getValidUntilDate() }}
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section
+    class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-lg space-y-4"
+  >
+    <div
+      class="p-5 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+    >
+      <div>
+        <h3 class="text-base font-bold text-white tracking-tight">
+          Today's Check-in Log
+        </h3>
+        <p class="text-xs text-zinc-400 mt-0.5">
+          Real-time attendance stream for today
+        </p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div
+          class="px-3.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs font-semibold text-zinc-300"
+        >
+          Total Today:
+          <span class="text-emerald-400 font-bold ml-1">{{
+            todayLogs().length
+          }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm text-zinc-300">
+        <thead
+          class="bg-zinc-950/60 border-b border-zinc-800 text-[11px] font-bold text-zinc-400 uppercase tracking-wider"
+        >
+          <tr>
+            <th scope="col" class="px-6 py-3.5">Time</th>
+            <th scope="col" class="px-6 py-3.5">Member</th>
+            <th scope="col" class="px-6 py-3.5">Phone Number</th>
+            <th scope="col" class="px-6 py-3.5">Plan</th>
+            <th scope="col" class="px-6 py-3.5 text-right">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-800/50">
+          @for (log of todayLogs(); track $index) {
+            <tr class="hover:bg-zinc-800/40 transition-colors">
+              <td
+                class="px-6 py-4 whitespace-nowrap text-xs font-mono text-zinc-400"
+              >
+                {{ log.checkInAt | date }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 flex items-center justify-center font-bold text-xs uppercase"
+                  >
+                    {{ log.member.firstName.charAt(0) | uppercase }}
+                    {{ log.member.lastName.charAt(0) | uppercase }}
+                  </div>
+                  <span class="font-medium text-white"
+                    >{{ log.member.firstName | uppercase }}
+                    {{ log.member.lastName | uppercase }}</span
+                  >
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-zinc-300">
+                {{ log.member.phoneNumber }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="font-medium text-zinc-200">{{
+                  log.member.currentPlan
+                }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <span
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-950/80 text-emerald-400 border border-emerald-800/50"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  Admitted
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="text-center py-8 text-zinc-500">
+                No check-ins today
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="px-6 py-3.5 border-t border-zinc-800 bg-zinc-950/40 flex items-center justify-between text-xs text-zinc-400"
+    >
+      <span>Showing recent entries for today</span>
+      <span class="text-zinc-500 font-mono">Stream Auto-Refreshes</span>
+    </div>
+  </section>
+</div>
