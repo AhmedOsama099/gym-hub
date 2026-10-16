@@ -6,8 +6,6 @@ if (process.env.__VERCEL_STATIC_BUNDLE_FORCE__) {
   require('@nestjs/common');
   require('@nestjs/core');
   require('@nestjs/platform-express');
-  require('@nestjs/jwt');
-  require('@nestjs/passport');
   require('@prisma/client');
   require('@prisma/adapter-pg');
   require('pg');
