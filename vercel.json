@@ -5,7 +5,7 @@
   "outputDirectory": "dist/apps/gym-web/browser",
   "functions": {
     "api/index.js": {
-      "includeFiles": "dist/apps/gym-api/**"
+      "includeFiles": "{dist/apps/gym-api/**,node_modules/.prisma/**,node_modules/@prisma/client/**}"
     }
   },
   "rewrites": [
