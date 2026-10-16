@@ -11,7 +11,17 @@ export class PrismaService
   private pool: Pool;
 
   constructor() {
-    const connectionString = process.env["DATABASE_URL"];
+    const connectionString =
+      process.env["DATABASE_URL"] ||
+      process.env["POSTGRES_URL"] ||
+      process.env["POSTGRES_PRISMA_URL"];
+
+    if (!connectionString) {
+      console.warn(
+        "Warning: Neither DATABASE_URL, POSTGRES_URL, nor POSTGRES_PRISMA_URL is set in process.env",
+      );
+    }
+
     const pool = new Pool({ connectionString });
     const adapter = new PrismaPg(pool);
 

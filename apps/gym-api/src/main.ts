@@ -1,41 +1,67 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
+import * as dotenv from "dotenv";
+import * as path from "path";
+
+// Load local .env if available
+dotenv.config({ path: path.resolve(process.cwd(), "apps/gym-api/.env") });
+dotenv.config();
 
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app/app.module";
 import cookieParser from "cookie-parser";
+import { ExpressAdapter } from "@nestjs/platform-express";
+import express, { Express } from "express";
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.use(cookieParser());
+let appInstance: any = null;
+let initPromise: Promise<any> | null = null;
 
-  // تفعيل التحقق التلقائي من صحة المدخلات وتنظيف البيانات غير المعرفة
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true, //DTO يتجاهل أي حقل إضافي يرسله المستخدم غير موجود في الـ
-      forbidNonWhitelisted: true, // يرجع خطأ لو تم إرسال حقول غير مسموحة
-      transform: true, // (مثل string إلى number إن تطلب الأمر) يحول الأنواع تلقائياً
-    }),
-  );
+export async function bootstrapNestServer() {
+  if (appInstance) return appInstance.getHttpAdapter().getInstance();
+  if (!initPromise) {
+    initPromise = (async () => {
+      const app = await NestFactory.create(AppModule);
+      app.use(cookieParser());
 
-  const globalPrefix = "api";
-  app.setGlobalPrefix(globalPrefix);
+      app.useGlobalPipes(
+        new ValidationPipe({
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          transform: true,
+        }),
+      );
 
-  app.enableCors({
-    origin: "http://localhost:4200", // عنوان تطبيق Angular
-    credentials: true, // ضروري جداً لتبادل Cookies
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  });
+      const globalPrefix = "api";
+      app.setGlobalPrefix(globalPrefix);
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port, "0.0.0.0");
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
-  );
+      app.enableCors({
+        origin: true,
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      });
+
+      await app.init();
+      appInstance = app;
+      return app.getHttpAdapter().getInstance();
+    })();
+  }
+  return initPromise;
 }
 
-bootstrap();
+// Standalone mode: when running via nx serve or direct node execution
+if (!process.env.VERCEL && require.main === module) {
+  bootstrapNestServer().then((expressInstance) => {
+    const port = process.env.PORT || 3000;
+    expressInstance.listen(Number(port), "0.0.0.0", () => {
+      Logger.log(
+        `🚀 Application is running on: http://localhost:${port}/api`,
+      );
+    });
+  });
+}
+
+// Default export for Vercel Serverless Function
+export default async function handler(req: any, res: any) {
+  const app = await bootstrapNestServer();
+  app(req, res);
+}

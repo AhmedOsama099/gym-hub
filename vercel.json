@@ -3,7 +3,20 @@
   "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "npm run build",
   "outputDirectory": "dist/apps/gym-web/browser",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "dist/apps/gym-api/**"
+    }
+  },
   "rewrites": [
+    {
+      "source": "/api",
+      "destination": "/api"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
