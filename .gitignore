@@ -47,3 +47,5 @@ Thumbs.db
 .angular
 
 /prisma/apps/gym-api/prisma
+
+.vercel

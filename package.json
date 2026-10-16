@@ -2,7 +2,11 @@
   "name": "@gym-hub/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "build": "nx build gym-web && node -e \"const fs=require('fs'),path=require('path');const p=path.join('dist','apps','gym-web','browser');if(fs.existsSync(path.join(p,'index.csr.html'))&&!fs.existsSync(path.join(p,'index.html'))){fs.copyFileSync(path.join(p,'index.csr.html'),path.join(p,'index.html'));console.log('Created index.html from index.csr.html');}\"",
+    "build:web": "nx build gym-web",
+    "build:api": "nx build gym-api"
+  },
   "private": true,
   "devDependencies": {
     "@angular-devkit/core": "~22.1.0",
