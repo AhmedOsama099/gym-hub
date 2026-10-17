@@ -31,6 +31,12 @@
       },
       "configurations": {
         "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/gym-web/src/environments/environment.ts",
+              "with": "apps/gym-web/src/environments/environment.prod.ts"
+            }
+          ],
           "budgets": [
             {
               "type": "initial",
