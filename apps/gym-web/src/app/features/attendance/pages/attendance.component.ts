@@ -1,81 +1,110 @@
-import { Component, inject, OnInit, signal } from "@angular/core";
-import { AttendanceService } from "../services/attendance.service";
-import { NotificationService } from "../../../core/notification.service";
-import { UpperCasePipe, DatePipe, DecimalPipe } from "@angular/common";
+import {
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { AttendanceService } from '../../services/attendance.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 
 @Component({
-  selector: "app-attendance",
-  imports: [UpperCasePipe, DatePipe, DecimalPipe],
+  selector: 'app-attendance',
   standalone: true,
-  templateUrl: "./attendance.component.html",
-  styleUrl: "./attendance.component.css",
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './attendance.component.html',
+  styleUrls: ['./attendance.component.css'],
 })
-export class AttendancePageComponent implements OnInit {
-  constructor() {}
-
+export class AttendanceComponent implements OnInit {
+  private readonly fb = inject(FormBuilder);
   private readonly attendanceService = inject(AttendanceService);
-  private readonly notificationService = inject(NotificationService);
+  private readonly notify = inject(NotificationService);
 
-  checkInValue = signal<string>("");
-  isCard = signal<boolean>(false);
+  @ViewChild('identifierInput') identifierInputRef!: ElementRef<HTMLInputElement>;
 
+  // استهلاك الـ Signals من السيرفيس
+  readonly todayLogs = this.attendanceService.todayLogs;
+  readonly totalToday = this.attendanceService.totalToday;
+  readonly loading = this.attendanceService.loading;
   readonly checkInLoading = this.attendanceService.checkInLoading;
   readonly lastCheckIn = this.attendanceService.lastCheckIn;
-  readonly loading = this.attendanceService.loading;
-  readonly todayLogs = this.attendanceService.todayLogs;
 
-  getCheckInValue(value: string) {
-    this.checkInValue.set(value);
-  }
+  // إشارة لحفظ رسالة الخطأ الأخيرة لو كان الدخول مرفوضاً (لعرض بانر أحمر)
+  readonly rejectionError = signal<string | null>(null);
+
+  checkInForm!: FormGroup;
 
   ngOnInit(): void {
-    this.attendanceService.loadTodayAttendance().subscribe({
-      error: (err) => {
-        this.notificationService.error(err.message);
-      },
+    this.initForm();
+    this.loadTodayData();
+  }
+
+  private initForm(): void {
+    this.checkInForm = this.fb.group({
+      identifier: ['', [Validators.required]],
     });
   }
 
-  onCheckInVerify() {
-    const identifier = this.checkInValue();
-    if (!identifier) {
-      this.notificationService.error("Please enter the phone number or id");
+  loadTodayData(): void {
+    this.attendanceService.loadTodayAttendance().subscribe({
+      error: () => this.notify.error("Failed to load today's attendance logs"),
+    });
+  }
+
+  submitCheckIn(): void {
+    if (this.checkInForm.invalid || this.checkInLoading()) {
       return;
     }
+
+    const identifier = this.checkInForm.value.identifier.trim();
+    if (!identifier) return;
+
+    // تصفير أخطاء الرفض السابقة قبل الفحص الجديد
+    this.rejectionError.set(null);
+
     this.attendanceService.checkIn(identifier).subscribe({
       next: (res) => {
-        this.isCard.set(true);
-        this.attendanceService.loadTodayAttendance();
-        this.checkInValue.set("");
-        this.notificationService.success(res.message);
+        this.notify.success(res.message || 'Check-in verified!');
+        this.checkInForm.reset();
+        this.focusInput();
       },
       error: (err) => {
-        this.notificationService.error(err.error.message);
+        const errorMsg =
+          err.error?.message || 'Access denied or subscription invalid';
+        const formattedMsg = Array.isArray(errorMsg) ? errorMsg[0] : errorMsg;
+        
+        // عرض الخطأ في البانر وأيضاً عبر التنبيه
+        this.rejectionError.set(formattedMsg);
+        this.attendanceService.clearLastCheckIn();
+        this.notify.error(formattedMsg);
+        this.focusInput();
       },
     });
   }
 
-  onClearInput() {
-    this.checkInValue.set("");
+  clearSearchInput(): void {
+    this.checkInForm.reset();
+    this.rejectionError.set(null);
+    this.attendanceService.clearLastCheckIn();
+    this.focusInput();
   }
 
-  onHideCard() {
-    this.isCard.set(false);
-    this.checkInValue.set("");
+  closeBanner(): void {
+    this.rejectionError.set(null);
+    this.attendanceService.clearLastCheckIn();
   }
 
-  getRemainingDays(endData: string) {
-    if (!endData) return 0;
-    const today = new Date();
-    const endDate = new Date(endData);
-    const diff = endDate.getTime() - today.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    return days;
-  }
-
-  getValidUntilDate() {
-    return new Date(
-      this.lastCheckIn()?.plan?.endDate || "",
-    ).toLocaleDateString();
+  private focusInput(): void {
+    setTimeout(() => {
+      this.identifierInputRef?.nativeElement?.focus();
+    }, 50);
   }
 }

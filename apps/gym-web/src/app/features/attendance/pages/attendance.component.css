@@ -17,9 +17,7 @@
   background: #3f3f46; /* zinc-700 */
 }
 
-/* Monospace alignment for timestamps */
+/* Monospace font for exact time alignment */
 .font-mono {
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
