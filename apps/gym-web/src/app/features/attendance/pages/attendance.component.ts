@@ -20,7 +20,7 @@ import { NotificationService } from '../../../core/notification.service';
   selector: 'app-attendance',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './attendance.component',
+  templateUrl: './attendance.component.html',
   styleUrls: ['./attendance.component.css'],
 })
 export class AttendanceComponent implements OnInit {
