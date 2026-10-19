@@ -13,14 +13,14 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { AttendanceService } from '../../services/attendance.service';
-import { NotificationService } from '../../../../core/services/notification.service';
+import { AttendanceService } from '../services/attendance.service';
+import { NotificationService } from '../../../core/notification.service';
 
 @Component({
   selector: 'app-attendance',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './attendance.component.html',
+  templateUrl: './attendance.component',
   styleUrls: ['./attendance.component.css'],
 })
 export class AttendanceComponent implements OnInit {

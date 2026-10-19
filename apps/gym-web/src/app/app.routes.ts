@@ -59,7 +59,7 @@ export const appRoutes: Route[] = [
     data: { expectedRole: ["ADMIN", "STAFF"] },
     loadComponent: () =>
       import("./features/attendance/pages/attendance.component").then(
-        (m) => m.AttendancePageComponent,
+        (m) => m.AttendanceComponent,
       ),
   },
   {
